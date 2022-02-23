@@ -40,6 +40,12 @@ public:
     Vec<T> operator-(const Vec<T> &rhs) const { return combine(*this, rhs, [](const T &v1, const T &v2) { return v1 - v2; }); }
     Vec<T> operator*(const Vec<T> &rhs) const { return combine(*this, rhs, [](const T &v1, const T &v2) { return v1 * v2; }); }
     Vec<T> operator/(const Vec<T> &rhs) const { return combine(*this, rhs, [](const T &v1, const T &v2) { return v1 / v2; }); }
+
+    Vec<T> operator+(const double rhs) const { return combine(*this, rhs, [](const T &v1, const double v2) { return v1 + v2; }); }
+    Vec<T> operator-(const double rhs) const { return combine(*this, rhs, [](const T &v1, const double v2) { return v1 - v2; }); }
+    Vec<T> operator*(const double rhs) const { return combine(*this, rhs, [](const T &v1, const double v2) { return v1 * v2; }); }
+    Vec<T> operator/(const double rhs) const { return combine(*this, rhs, [](const T &v1, const double v2) { return v1 / v2; }); }
+
     Vec<T>& operator+=(const Vec<T> &rhs) const { return combine(rhs, [](const T &v1, const T &v2) { return v1 + v2; }); }
     Vec<T>& operator-=(const Vec<T> &rhs) const { return combine(rhs, [](const T &v1, const T &v2) { return v1 - v2; }); }
     Vec<T>& operator*=(const Vec<T> &rhs) const { return combine(rhs, [](const T &v1, const T &v2) { return v1 * v2; }); }
@@ -73,10 +79,39 @@ public:
         return v.size();
     }
 
+    static Vec<T> minVec(std::size_t size) {
+        return Vec(size, std::numeric_limits<double>::min());
+    }
+
+    static Vec<T> maxVec(std::size_t size) {
+        return Vec(size, std::numeric_limits<double>::max());
+    }
+
+    static Vec<T> min(std::vector<Vec<T>> vectors) {
+        assert(vectors.size() > 0);
+        Vec<T> minVec(vectors[0].size(), std::numeric_limits<T>::max());
+        for (const Vec<T>& vec : vectors) {
+            for (int i = 0; i < vec.size(); ++ i) {
+                minVec[i] = std::fmin(vec[i], minVec[i]);
+            }
+        }
+        return minVec;
+    }
+
+    static Vec<T> max(std::vector<Vec<T>> vectors) {
+        assert(vectors.size() > 0);
+        Vec<T> minVec(vectors[0].size(), std::numeric_limits<T>::min());
+        for (const Vec<T>& vec : vectors) {
+            for (int i = 0; i < vec.size(); ++ i) {
+                minVec[i] = std::fmax(vec[i], minVec[i]);
+            }
+        }
+        return minVec;
+    }
+
 protected:
     std::vector<T> v;
-
-    Vec<T> combine(const Vec<T> &lhs, const Vec<T> &rhs, std::function<T (const T&, const T&)> binaryOperator) {
+    Vec<T> combine(const Vec<T> &lhs, const Vec<T> &rhs, std::function<T (const T&, const T&)> binaryOperator) const {
         assert(lhs.size() == rhs.size());
         Vec target(lhs.size(), 0);
         for (int i = 0; i < lhs.size(); ++i) {
@@ -84,7 +119,13 @@ protected:
         }
         return target;
     }
-
+    Vec<T> combine(const Vec<T> &lhs, const double &rhs, std::function<T (const T&, const T&)> binaryOperator) const {
+        Vec target(lhs.size(), 0);
+        for (int i = 0; i < lhs.size(); ++i) {
+            target[i] = binaryOperator(lhs[i], rhs);
+        }
+        return target;
+    }
     Vec<T>& combine(const Vec<T> &rhs, std::function<T (const T&, const T&)> binaryOperator) {
         assert(size() == rhs.size());
         for (int i = 0; i < v.size(); ++i) {
@@ -99,8 +140,8 @@ class Vec3f: public Vec<double> {
         return lhs.cross(rhs);
     }
 public:
-    Vec3f(const Vec<double> &v): Vec(v) { assert(v.size() == 3); }
     Vec3f(const Vec3f &v): Vec(v) { assert(v.size() == 3); }
+    Vec3f(const Vec<double> &v): Vec(v) { assert(v.size() == 3); }
     Vec3f(const std::initializer_list<double> parameters): Vec{parameters} { assert(parameters.size() == 3); }
     Vec3f(double x, double y, double z): Vec{ x, y, z } {}
     Vec3f() = default;
@@ -123,6 +164,14 @@ public:
                 z() * rhs.x() - x() * rhs.z(),
                 x() * rhs.y() - y() * rhs.x()
         );
+    }
+
+    static Vec3f maxVec3f() {
+        return Vec(3, std::numeric_limits<double>::max());
+    }
+
+    static Vec3f minVec3f() {
+        return Vec(3, std::numeric_limits<double>::min());
     }
 };
 
