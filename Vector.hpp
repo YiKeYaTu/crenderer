@@ -46,10 +46,22 @@ public:
     Vec<T> operator*(const double rhs) const { return combine(*this, rhs, [](const T &v1, const double v2) { return v1 * v2; }); }
     Vec<T> operator/(const double rhs) const { return combine(*this, rhs, [](const T &v1, const double v2) { return v1 / v2; }); }
 
-    Vec<T>& operator+=(const Vec<T> &rhs) const { return combine(rhs, [](const T &v1, const T &v2) { return v1 + v2; }); }
-    Vec<T>& operator-=(const Vec<T> &rhs) const { return combine(rhs, [](const T &v1, const T &v2) { return v1 - v2; }); }
-    Vec<T>& operator*=(const Vec<T> &rhs) const { return combine(rhs, [](const T &v1, const T &v2) { return v1 * v2; }); }
-    Vec<T>& operator/=(const Vec<T> &rhs) const { return combine(rhs, [](const T &v1, const T &v2) { return v1 / v2; }); }
+    Vec<T> operator+=(const double rhs) { return combine(rhs, [](const T &v1, const double v2) { return v1 + v2; }); }
+    Vec<T> operator/=(const double rhs) { return combine(rhs, [](const T &v1, const double v2) { return v1 / v2; }); }
+
+    Vec<T>& operator+=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 + v2; }); }
+    Vec<T>& operator-=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 - v2; }); }
+    Vec<T>& operator*=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 * v2; }); }
+    Vec<T>& operator/=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 / v2; }); }
+
+    T norm() const {
+        T n = 0;
+        for (const auto &item : v) {
+            n += item * item;
+        }
+        n = sqrt(n);
+        return n;
+    }
 
     Vec<T> normalized() const {
         T n = 0;
@@ -133,6 +145,13 @@ protected:
         }
         return *this;
     }
+
+    Vec<T>& combine(const double &rhs, std::function<T (const T&, const T&)> binaryOperator) {
+        for (int i = 0; i < v.size(); ++i) {
+            v[i] = binaryOperator(v[i], rhs);
+        }
+        return *this;
+    }
 };
 
 class Vec3f: public Vec<double> {
@@ -144,7 +163,7 @@ public:
     Vec3f(const Vec<double> &v): Vec(v) { assert(v.size() == 3); }
     Vec3f(const std::initializer_list<double> parameters): Vec{parameters} { assert(parameters.size() == 3); }
     Vec3f(double x, double y, double z): Vec{ x, y, z } {}
-    Vec3f() = default;
+    Vec3f(): Vec<double>(3, 0) {}
 
     const double x() const {
         return v[0];

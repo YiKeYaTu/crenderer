@@ -5,25 +5,10 @@
 #ifndef CRENDERER_OBJLOADER_HPP
 #define CRENDERER_OBJLOADER_HPP
 
-#include "../core/Vector.hpp"
+#include "../Vector.hpp"
+#include "./util.hpp"
 #include <string>
 #include <fstream>
-
-std::vector<std::string> split(std::string& s, const std::string& separator) {
-    std::vector<std::string> tokens;
-
-    for (int i = 0, j; ; i = j + separator.length()) {
-        j = s.find(separator, i);
-        if (j == -1) {
-            tokens.push_back(s.substr(i, s.size() - i));
-            break;
-        } else {
-            tokens.push_back(s.substr(i, j - i));
-        }
-    }
-
-    return tokens;
-}
 
 class OBJLoader {
 public:
@@ -42,11 +27,12 @@ public:
         std::vector<std::string> tokens;
 
         while (std::getline(_ifs, line)) {
+            line = util::trim(line);
             if (line[0] == '#') {
                 continue;
             }
 
-            tokens = split(line, " ");
+            tokens = util::split(line, " ");
             assert(tokens.size() == 4);
             switch (line[0]) {
                 case 'v':

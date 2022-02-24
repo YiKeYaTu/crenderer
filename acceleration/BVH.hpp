@@ -52,6 +52,7 @@ public:
         return buildBVH_(geometries, 0, 0, geometries.size());
     }
 
+    std::shared_ptr<Geometry> geometry() { return geometry_; }
     Bounds3 bounds3() { return bounds3_; }
     std::shared_ptr<BVH> left() { return left_; }
     std::shared_ptr<BVH> right() { return right_; }
