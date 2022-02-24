@@ -22,10 +22,9 @@ public:
         v0_(v0), v1_(v1), v2_{v2},
         e0_(v1 - v0), e1_(v2 - v1), e2_(v0 - v2),
         n_(cross(e0_, e1_)),
-        Geometry(
-                (v0 + v1 + v2) / 3,
-                Bounds3::computeBounds3({ v0, v1, v2 })
-                ) { };
+        Geometry((v0 + v1 + v2) / 3,Bounds3::computeBounds3({ v0, v1, v2 })) {};
+
+    Vec3f normal() const { return n_; }
 
     virtual Intersection intersect(const Ray& ray) override {
         Vec3f o = ray.origin;

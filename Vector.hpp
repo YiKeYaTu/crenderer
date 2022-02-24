@@ -28,6 +28,7 @@ class Vec {
 
     friend T dot(const Vec<T>& lhs, const Vec<T>& rhs) { return lhs.dot(rhs); }
     friend Vec<T> normalized(const Vec<T>& vec) { return vec.normalized(); }
+    friend double cos(const Vec<T>& l, const Vec<T>& r) { return l.dot(r) / l.norm() / r.norm(); }
 
 public:
     Vec(const std::vector<T>& v): v(v) {}
@@ -53,6 +54,14 @@ public:
     Vec<T>& operator-=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 - v2; }); }
     Vec<T>& operator*=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 * v2; }); }
     Vec<T>& operator/=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 / v2; }); }
+
+    Vec<T> operator-() {
+        Vec<T> reverseVec(v);
+        for (int i = 0; i < reverseVec.size(); ++i) {
+            reverseVec[i] = -reverseVec[i];
+        }
+        return reverseVec;
+    }
 
     T norm() const {
         T n = 0;

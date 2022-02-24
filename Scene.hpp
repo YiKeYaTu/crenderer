@@ -7,6 +7,7 @@
 
 #include "Vector.hpp"
 #include "MeshTriangle.hpp"
+#include <cmath>
 
 class Scene {
 private:
@@ -41,15 +42,28 @@ public:
                 }
                 m ++;
             }
+            util::UpdateProgress(j / (float)height_);
         }
+        util::UpdateProgress(1.f);
 
         return frameBuffer_;
     }
     Vec3f trace(const Ray& ray) {
         Vec3f renderedColor;
+
+        MeshTriangle nearestObject;
+        Intersection nearestIntersection;
+
         for (const auto& object : objects_) {
-            renderedColor += trace1object_(ray, object);
+            Intersection itersec = object.intersect(ray);
+            if (itersec.t() < nearestIntersection.t()) {
+                nearestIntersection = itersec;
+                nearestObject = object;
+            }
         }
+
+        renderedColor += trace1object_(ray, nearestObject);
+
         return renderedColor;
     }
 
@@ -61,26 +75,51 @@ private:
             return Vec3f();
         }
 
-        Geometry* intersectedObject = intersection.intersectedObject();
+        if (object.material().isLightSource()) {
+            return Vec3f(1, 1, 1);
+        }
+
         const Vec3f hitPoint = intersection.hitPoint();
         const double eps = 0.001;
         Vec3f renderedColor;
 
-        for (const auto& object : objects_) {
-            if (object.material().isLightSource()) {
-                Vec3f lightPosition = object.centroid();
-                Ray ray2light(hitPoint, (lightPosition - hitPoint).normalized());
-                double ideaDistance2light = (hitPoint - lightPosition).norm();
+        for (const auto& o : objects_) {
+            if (&o == &object || !o.material().isLightSource()) {
+                continue;
+            }
 
-                Intersection intersectWithLight = object.intersect(ray2light);
+            Vec3f lightPosition = o.centroid();
+            Ray ray2light(hitPoint, (lightPosition - hitPoint).normalized());
+            double ideaDistance2light = (hitPoint - lightPosition).norm();
+            Intersection intersectWithLight = o.intersect(ray2light);
 
-                if (intersectWithLight.happened() && std::abs(intersectWithLight.distance() - ideaDistance2light) <= eps) {
-                    renderedColor += object.material().intensity();
-                }
+            if (intersectWithLight.happened() && std::abs(intersectWithLight.distance() - ideaDistance2light) <= eps) {
+                renderedColor += phongFragmentShader(ray, object, intersection, o);
             }
         }
 
         return renderedColor;
+    }
+
+    Vec3f phongFragmentShader(const Ray& camera2hitPoint, const MeshTriangle& object, const Intersection& intersection, const MeshTriangle& light) {
+        const Vec3f camera2hitPointVec(camera2hitPoint.direction);
+        const Vec3f light2hitPointVec(intersection.hitPoint() - light.centroid());
+
+        double p = 150;
+        double r2 = (light.centroid() - intersection.hitPoint()).norm();
+
+        Triangle* intersectedTriangle = dynamic_cast<Triangle*>(intersection.intersectedObject());
+        Vec3f normal = -intersectedTriangle->normal();
+        Vec3f intensity = light.material().e();
+
+        Vec3f ks(object.material().ks());
+        Vec3f kd(object.material().kd());
+
+        Vec3f specular = ks * cos(light2hitPointVec, normal) * std::pow(cos(camera2hitPointVec + light2hitPointVec, normal), p) * intensity / r2;
+        Vec3f diffuse = kd * cos(light2hitPointVec, normal) * intensity / r2;
+
+        Vec3f color = specular + diffuse;
+        return color;
     }
 };
 

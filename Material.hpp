@@ -8,14 +8,19 @@
 class Material {
 public:
     Material() = default;
-    Material(double intensity): intensity_(intensity), isLightSource_(true) {}
+    Material(const Vec3f &kd, const Vec3f &ks) : kd_(kd), ks_(ks) {}
+    Material(const Vec3f &kd, const Vec3f &ks, const Vec3f &e) : e_(e), kd_(kd), ks_(ks), isLightSource_(true) {}
 
     bool isLightSource() { return isLightSource_; }
-    double intensity() { return intensity_; }
+    const Vec3f& e() const { return e_; }
+    const Vec3f& kd() const { return kd_; }
+    const Vec3f& ks() const { return ks_; }
 
 private:
     bool isLightSource_ = false;
-    double intensity_;
+    Vec3f e_;
+    Vec3f kd_;
+    Vec3f ks_;
 };
 
 #endif //CRENDERER_MATERIAL_HPP

@@ -16,11 +16,10 @@
 
 class MeshTriangle {
 public:
-    static MeshTriangle loadObjectFromObjFile(const std::string &);
-    static MeshTriangle loadLightFromObjFile(const std::string &, const Material& material);
+    static MeshTriangle loadObjectFromObjFile(const std::string &, const Material& material);
+    MeshTriangle() = default;
     MeshTriangle(const std::vector<Vec3f> &vertexes, const std::vector<std::size_t> indexes, const Material& material)
     : MeshTriangle(vertexes, indexes) { material_ = material; }
-
     MeshTriangle(const std::vector<Vec3f> &vertexes, const std::vector<std::size_t> indexes) {
         for (int i = 0; i < static_cast<int>(indexes.size()) - 2; i += 3) {
             auto a = vertexes[indexes[i + 0]];
@@ -78,19 +77,7 @@ private:
     }
 };
 
-MeshTriangle MeshTriangle::loadObjectFromObjFile(const std::string &fileName) {
-    OBJLoader loader(fileName);
-
-    try {
-        loader.loadOBJFile();
-    } catch (std::exception* e) {
-        std::cout << e->what();
-    }
-
-    return MeshTriangle(loader.vertexes(), loader.indexes());
-}
-
-MeshTriangle MeshTriangle::loadLightFromObjFile(const std::string &fileName, const Material& material) {
+MeshTriangle MeshTriangle::loadObjectFromObjFile(const std::string &fileName, const Material& material) {
     OBJLoader loader(fileName);
 
     try {

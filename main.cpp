@@ -73,16 +73,22 @@ int main() {
 //    Intersection intersection3 = b1.intersect(ray3);
 //    Intersection intersection4 = b1.intersect(ray4);
 
-    MeshTriangle floor = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/floor.obj");
-    MeshTriangle left = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/left.obj");
-    MeshTriangle right = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/right.obj");
-    MeshTriangle tallbox = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/tallbox.obj");
-    MeshTriangle shortbox = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/shortbox.obj");
+    Material redMaterial(Vec3f(0.63f, 0.065f, 0.05f), Vec3f());
+    Material greenMaterial(Vec3f(0.14f, 0.45f, 0.091f), Vec3f());
+    Material whiteMaterial(Vec3f(0.725f, 0.71f, 0.68f), Vec3f());
+    Material lightMaterial(Vec3f(0.65f, 0.65f, 0.65f), Vec3f(), (Vec3f(0.747f+0.058f, 0.747f+0.258f, 0.747f)*8.0f + Vec3f(0.740f+0.287f,0.740f+0.160f,0.740f)*15.6f + Vec3f(0.737f+0.642f,0.737f+0.159f,0.737f)*18.4f));
+//    Material* light = new Material(DIFFUSE, (8.0f * Vector3f(0.747f+0.058f, 0.747f+0.258f, 0.747f) + 15.6f * Vector3f(0.740f+0.287f,0.740f+0.160f,0.740f) + 18.4f *Vector3f(0.737f+0.642f,0.737f+0.159f,0.737f)));
+//    light->Kd = Vector3f(0.65f);
 
-    MeshTriangle light = MeshTriangle::loadLightFromObjFile("../models/cornellbox/light.obj", Material(1000));
+    MeshTriangle floor = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/floor.obj", whiteMaterial);
+    MeshTriangle left = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/left.obj", redMaterial);
+    MeshTriangle right = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/right.obj", greenMaterial);
+    MeshTriangle tallbox = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/tallbox.obj", whiteMaterial);
+    MeshTriangle shortbox = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/shortbox.obj", whiteMaterial);
+    MeshTriangle light = MeshTriangle::loadObjectFromObjFile("../models/cornellbox/light.obj", lightMaterial);
 
     Scene scene(300, 300);
-//    scene.addObject(floor);
+    scene.addObject(floor);
     scene.addObject(left);
     scene.addObject(right);
     scene.addObject(tallbox);

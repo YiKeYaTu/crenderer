@@ -21,14 +21,14 @@ public:
     hitPoint_(hitPoint),
     intersectedObject_(intersectedObject) {}
 
-    bool happened() { return happened_; }
-    double t() { return t_; }
-    double alpha() { return alpha_; }
-    double beta() { return beta_; }
-    double gamma() { return gamma_; }
-    double distance() { return distance_; }
-    Vec3f hitPoint() { return hitPoint_; }
-    Geometry* intersectedObject() { return intersectedObject_; }
+    bool happened() const { return happened_; }
+    double t() const { return t_; }
+    double alpha() const { return alpha_; }
+    double beta() const { return beta_; }
+    double gamma() const { return gamma_; }
+    double distance() const { return distance_; }
+    Vec3f hitPoint() const { return hitPoint_; }
+    Geometry* intersectedObject() const { return intersectedObject_; }
 private:
     double t_ = std::numeric_limits<double>::max();
     double alpha_;
