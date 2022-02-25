@@ -6,7 +6,7 @@
 #define CRENDERER_SCENE_HPP
 
 #include "Vector.hpp"
-#include "MeshTriangle.hpp"
+#include "object/MeshTriangle.hpp"
 #include <cmath>
 
 class Scene {
@@ -15,8 +15,12 @@ private:
     const unsigned int width_;
     const unsigned int height_;
     std::vector<Vec3f> frameBuffer_;
+    Vec3f cameraPos_;
+    Vec3f bgColor_;
+    std::shared_ptr<BVH> bvh_;
 public:
-    Scene(const unsigned int width, const unsigned int height) : width_(width), height_(height) {
+    Scene(const unsigned int width, const unsigned int height, const Vec3f& cameraPos, const Vec3f& bgColor)
+    : width_(width), height_(height), cameraPos_(cameraPos), bgColor_(bgColor) {
         frameBuffer_.resize(width * height);
     }
     const unsigned int width() const { return width_; }
@@ -24,9 +28,6 @@ public:
     void addObject(MeshTriangle& object) { objects_.push_back(object); }
 
     std::vector<Vec3f> render() {
-        Vec3f cameraPos(278, 273, -800);
-        double aspectRatio = width_ / height_;
-
         int m = 0;
 
         for (uint32_t j = 0; j < height_; ++j) {
@@ -36,8 +37,8 @@ public:
 
                 Vec3f dir = Vec3f(-x, y, 1).normalized();
 
-                for (int k = 0; k < 16; ++k) {
-                    const Ray ray(cameraPos, dir);
+                for (int k = 0; k < 1; ++k) {
+                    const Ray ray(cameraPos_, dir);
                     frameBuffer_[m] += trace(ray);
                 }
                 m ++;
@@ -72,48 +73,62 @@ private:
         Intersection intersection = object.intersect(ray);
 
         if (!intersection.happened()) {
-            return Vec3f();
+            return bgColor_;
         }
 
-        if (object.material().isLightSource()) {
+        if (object.material()->isLightSource()) {
             return Vec3f(1, 1, 1);
         }
 
         const Vec3f hitPoint = intersection.hitPoint();
-        const double eps = 0.001;
         Vec3f renderedColor;
 
         for (const auto& o : objects_) {
-            if (&o == &object || !o.material().isLightSource()) {
+            if (&o == &object || !o.material()->isLightSource()) {
                 continue;
             }
 
             Vec3f lightPosition = o.centroid();
             Ray ray2light(hitPoint, (lightPosition - hitPoint).normalized());
-            double ideaDistance2light = (hitPoint - lightPosition).norm();
             Intersection intersectWithLight = o.intersect(ray2light);
 
-            if (intersectWithLight.happened() && std::abs(intersectWithLight.distance() - ideaDistance2light) <= eps) {
-                renderedColor += phongFragmentShader(ray, object, intersection, o);
+            if (((intersectWithLight.hitPoint() - lightPosition).norm() < 1)) {
+                renderedColor += phongFragmentShader(ray, intersection, o);
             }
         }
 
         return renderedColor;
     }
 
-    Vec3f phongFragmentShader(const Ray& camera2hitPoint, const MeshTriangle& object, const Intersection& intersection, const MeshTriangle& light) {
+    Vec3f pathTraceFragmentShader(const Ray& camera2hitPoint, const Intersection& intersection, const MeshTriangle& light) {
+        Vec3f ks(intersection.intersectedObject()->material()->ks());
+        Vec3f kd(intersection.intersectedObject()->material()->kd());
+
+        Vec3f directColor;
+        Vec3f inDirectColor;
+
+        // todo: 在光源上 sample 一个点
+        // todo: 在当前物体的包围半球上 sample 一个点
+
+        if (util::getRandom01() > 0.6) {
+            inDirectColor;
+        }
+
+        return directColor + inDirectColor;
+    }
+
+    Vec3f phongFragmentShader(const Ray& camera2hitPoint, const Intersection& intersection, const MeshTriangle& light) {
         const Vec3f camera2hitPointVec(camera2hitPoint.direction);
         const Vec3f light2hitPointVec(intersection.hitPoint() - light.centroid());
 
         double p = 150;
         double r2 = (light.centroid() - intersection.hitPoint()).norm();
 
-        Triangle* intersectedTriangle = dynamic_cast<Triangle*>(intersection.intersectedObject());
-        Vec3f normal = -intersectedTriangle->normal();
-        Vec3f intensity = light.material().e();
+        Vec3f normal = -intersection.intersectedObject()->normal();
+        Vec3f intensity = light.material()->e();
 
-        Vec3f ks(object.material().ks());
-        Vec3f kd(object.material().kd());
+        Vec3f ks(intersection.intersectedObject()->material()->ks());
+        Vec3f kd(intersection.intersectedObject()->material()->kd());
 
         Vec3f specular = ks * cos(light2hitPointVec, normal) * std::pow(cos(camera2hitPointVec + light2hitPointVec, normal), p) * intensity / r2;
         Vec3f diffuse = kd * cos(light2hitPointVec, normal) * intensity / r2;

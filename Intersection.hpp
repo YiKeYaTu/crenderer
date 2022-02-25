@@ -5,13 +5,13 @@
 #ifndef CRENDERER_INTERSECTION_HPP
 #define CRENDERER_INTERSECTION_HPP
 
-extern class Geometry;
+extern class Object;
 
 class Intersection {
 public:
     Intersection() = default;
     explicit Intersection(bool happened): happened_(happened) {}
-    Intersection(double t, double alpha, double beta, double gamma, double distance, Vec3f& hitPoint, Geometry *intersectedObject)
+    Intersection(double t, double alpha, double beta, double gamma, double distance, const Vec3f& hitPoint, const Object *intersectedObject)
     : t_(t),
     alpha_(alpha),
     beta_(beta),
@@ -28,7 +28,7 @@ public:
     double gamma() const { return gamma_; }
     double distance() const { return distance_; }
     Vec3f hitPoint() const { return hitPoint_; }
-    Geometry* intersectedObject() const { return intersectedObject_; }
+    const Object* intersectedObject() const { return intersectedObject_; }
 private:
     double t_ = std::numeric_limits<double>::max();
     double alpha_;
@@ -37,7 +37,7 @@ private:
     double distance_;
     Vec3f hitPoint_;
     bool happened_ = false;
-    Geometry* intersectedObject_;
+    const Object* intersectedObject_;
 };
 
 #endif //CRENDERER_INTERSECTION_HPP

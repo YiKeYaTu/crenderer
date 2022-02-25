@@ -55,7 +55,7 @@ public:
     Vec<T>& operator*=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 * v2; }); }
     Vec<T>& operator/=(const Vec<T> &rhs) { return combine(rhs, [](const T &v1, const T &v2) { return v1 / v2; }); }
 
-    Vec<T> operator-() {
+    Vec<T> operator-() const {
         Vec<T> reverseVec(v);
         for (int i = 0; i < reverseVec.size(); ++i) {
             reverseVec[i] = -reverseVec[i];

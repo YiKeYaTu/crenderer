@@ -6,10 +6,10 @@
 #define CRENDERER_TRIANGLE_HPP
 
 #include "../Vector.hpp"
-#include "Geometry.hpp"
+#include "Object.hpp"
 #include "../acceleration/Bounds3.hpp"
 
-class Triangle: public Geometry {
+class Triangle: public Object {
     friend std::ostream &operator<<(std::ostream &os, const Triangle &t) {
         os << "v0: " << t.v0_ << std::endl;
         os << "v1: " << t.v1_ << std::endl;
@@ -18,15 +18,17 @@ class Triangle: public Geometry {
         return os;
     }
 public:
-    explicit Triangle(const Vec3f &v0, const Vec3f &v1, const Vec3f &v2):
+    explicit Triangle(const Vec3f &v0, const Vec3f &v1, const Vec3f &v2): Triangle(v0, v1, v2, nullptr) {}
+    explicit Triangle(const Vec3f &v0, const Vec3f &v1, const Vec3f &v2, const Material* material):
         v0_(v0), v1_(v1), v2_{v2},
-        e0_(v1 - v0), e1_(v2 - v1), e2_(v0 - v2),
-        n_(cross(e0_, e1_)),
-        Geometry((v0 + v1 + v2) / 3,Bounds3::computeBounds3({ v0, v1, v2 })) {};
+        e0_(v1 - v0), e1_(v2 - v1), e2_(v0 - v2) {
+            material_ = material;
+            centroid_ = (v0 + v1 + v2) / 3;
+            bounds3_ = Bounds3::computeBounds3({ v0, v1, v2 });
+            normal_ = cross(e0_, e1_);
+        };
 
-    Vec3f normal() const { return n_; }
-
-    virtual Intersection intersect(const Ray& ray) override {
+    virtual Intersection intersect(const Ray& ray) const override {
         Vec3f o = ray.origin;
         Vec3f d = ray.direction;
         Vec3f v13 = v0_ - v2_;
@@ -47,9 +49,11 @@ public:
         double D3 = c11*c22*r3 + c12*r2*c31 + r1*c21*c32 - r1*c22*c31 - c11*r2*c32 - c12*c21*r3;
 
         double t = D1 / D;
-        double a = D2 / D, b = D3 / D, c = 1 - a - b;
+        double a = D2 / D, b = D3 / D, c = 1.0f - a - b;
 
-        if (t < 0 || a < 0 || b < 0 || c < 0) {
+        double eps = 1e-15;
+
+        if (t < 0 || a + eps < 0 || b + eps < 0 || c + eps < 0) {
             return Intersection();
         }
 
@@ -62,6 +66,7 @@ private:
     Vec3f v0_, v1_, v2_;
     Vec3f e0_, e1_, e2_;
     Vec3f n_;
+    void* belongsTo_;
 };
 
 #endif //CRENDERER_TRIANGLE_HPP

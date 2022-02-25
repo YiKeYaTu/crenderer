@@ -8,8 +8,15 @@
 #include <vector>
 #include <cmath>
 #include <string>
+#include <random>
 
 namespace util {
+double getRandom01() {
+    static std::random_device dev;
+    static std::mt19937 rng(dev());
+    static std::uniform_int_distribution<std::mt19937::result_type> dist01(0, 10);
+    return static_cast<double>(dist01(rng)) / 10;
+}
 std::vector<std::string> split(std::string& s, const std::string& separator) {
     std::vector<std::string> tokens;
 
@@ -45,8 +52,8 @@ double clamp(double min, double max, double val) {
     return std::fmax(min, std::fmin(max, val));
 }
 
-void saveFrameBufferAsPPM(std::vector<Vec3f>& frameBuffer, int width, int height) {
-    FILE* fp = fopen("binary.ppm", "wb");
+void saveFrameBufferAsPPM(const char* fileName, std::vector<Vec3f>& frameBuffer, int width, int height) {
+    FILE* fp = fopen(fileName, "wb");
     (void)fprintf(fp, "P6\n%d %d\n255\n", width, height);
     for (auto i = 0; i < height * width; ++i) {
         static unsigned char color[3];
