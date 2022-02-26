@@ -41,7 +41,7 @@ void renderCornellBox() {
     MeshTriangle shortbox = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/shortbox.obj", whiteMaterial);
     MeshTriangle light = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/light.obj", lightMaterial);
 
-    Scene scene(300, 300, Vec3f(278, 273, -800), Vec3f());
+    Scene scene(800, 800, Vec3f(278, 273, -800), Vec3f());
 
     scene.addObject(floor);
     scene.addObject(left);

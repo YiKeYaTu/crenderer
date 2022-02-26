@@ -60,7 +60,7 @@ public:
         Vec3f hitPoint(v0_*a + v1_*b + v2_*c);
         double distance = (ray.direction*t).norm();
 
-        return Intersection(t, a, b, c, distance, hitPoint, this);
+        return Intersection(t, a, b, c, distance, hitPoint + normal_.normalized() * 0.00001, this);
     };
 private:
     Vec3f v0_, v1_, v2_;

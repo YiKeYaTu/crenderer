@@ -45,7 +45,7 @@ public:
 
         for (int i = 0; i < 3; ++i) {
             t1 = (min_[i] - ray.origin[i]) * ray.recDirection[i];
-            t2 = (max_[i] -  ray.origin[i]) * ray.recDirection[i];
+            t2 = (max_[i] - ray.origin[i]) * ray.recDirection[i];
 
             if (t1 < 0 && t2 < 0) { return Intersection(); }
 

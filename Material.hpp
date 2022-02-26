@@ -5,6 +5,8 @@
 #ifndef CRENDERER_MATERIAL_HPP
 #define CRENDERER_MATERIAL_HPP
 
+#include "utils/util.hpp"
+
 class Material {
 public:
     Material() = default;
@@ -21,7 +23,7 @@ public:
         if (cosWiNormal <= 0) {
             return Vec3f();
         }
-        return Vec3f(1);
+        return kd_ / util::MY_PI;
     }
 
 private:

@@ -36,11 +36,14 @@ public:
                 float y = (1 - 2 * (j + 0.5) / (float)height_);
 
                 Vec3f dir = Vec3f(-x, y, 1).normalized();
+                int maxK = 16;
 
-                for (int k = 0; k < 1; ++k) {
+                for (int k = 0; k < maxK; ++k) {
                     const Ray ray(cameraPos_, dir);
                     frameBuffer_[m] += trace(ray);
                 }
+
+                frameBuffer_[m] /= maxK;
                 m ++;
             }
             util::UpdateProgress(j / (float)height_);
@@ -49,9 +52,8 @@ public:
 
         return frameBuffer_;
     }
-    Vec3f trace(const Ray& ray) {
-        Vec3f renderedColor;
 
+    std::pair<Intersection, MeshTriangle> intersect(const Ray& ray) {
         MeshTriangle nearestObject;
         Intersection nearestIntersection;
 
@@ -62,6 +64,17 @@ public:
                 nearestObject = object;
             }
         }
+        return { nearestIntersection, nearestObject };
+    }
+
+    Vec3f trace(const Ray& ray) {
+        Vec3f renderedColor;
+
+        const auto& p = intersect(ray);
+
+        MeshTriangle nearestObject = p.second;
+        Intersection nearestIntersection = p.first;
+
 
         renderedColor += trace1object_(ray, nearestObject);
 
@@ -118,9 +131,9 @@ private:
             return bgColor_;
         }
 
-        if (object.material()->isLightSource()) {
-            return Vec3f(1, 1, 1);
-        }
+        //if (object.material()->isLightSource()) {
+        //    return Vec3f(1, 1, 1);
+        //}
 
         const Vec3f hitPoint = intersection.hitPoint();
         Vec3f renderedColor;
@@ -132,12 +145,20 @@ private:
 
             Vec3f lightPosition = o.centroid();
             Ray ray2light(hitPoint, (lightPosition - hitPoint).normalized());
-            Intersection intersectWithLight = o.intersect(ray2light);
 
-            if (((intersectWithLight.hitPoint() - lightPosition).norm() < 1)) {
-                //renderedColor += phongFragmentShader(ray, intersection, o);
-                pathTraceFragmentShader(ray, intersection, o);
+
+            const auto& p = intersect(ray2light);
+
+            MeshTriangle nearestObject = p.second;
+            Intersection nearestIntersection = p.first;
+
+            // Intersection intersectWithLight = o.intersect(ray2light);
+
+            if ((nearestIntersection.hitPoint() - lightPosition).norm() < 1) {
+                // renderedColor += phongFragmentShader(ray, intersection, o);
+                
             }
+            renderedColor += pathTraceFragmentShader(ray, intersection, o);
         }
 
         return renderedColor;
@@ -147,9 +168,9 @@ private:
         Vec3f ks(intersection.intersectedObject()->material()->ks());
         Vec3f kd(intersection.intersectedObject()->material()->kd());
 
-        Vec3f directColor;
-        Vec3f inDirectColor;
-        // 方向量向外
+        //Vec3f directColor;
+        //Vec3f inDirectColor;
+        //// 方向量向外
         Vec3f intersectedObjectNormal = intersection.intersectedObject()->normal().normalized();
 
         Vec3f radiance, sampleLightPosition;
@@ -157,23 +178,45 @@ private:
 
         sampleLight(radiance, sampleLightPosition, sampleRatio);
 
-        double r2 = std::fpow((sampleLightPosition - intersection.hitPoint()).norm(), 2);
+        Ray ray2light(intersection.hitPoint(), (sampleLightPosition - intersection.hitPoint()).normalized());
+        Intersection intersectWithLight = light.intersect(ray2light);
 
+        const auto& p = intersect(ray2light);
 
-        //directColor += radiance / r2;
+        MeshTriangle nearestObject = p.second;
+        Intersection nearestIntersection = p.first;
+
+        // Intersection intersectWithLight = o.intersect(ray2light);
+        Vec3f directColor(0, 0, 0);
+        Vec3f inDirectColor(0, 0, 0);
+
+        if ((nearestIntersection.hitPoint() - sampleLightPosition).norm() < 0.1) {
+            double r = (sampleLightPosition - intersection.hitPoint()).norm();
+            double r2 = std::pow(r, 2);
+            Vec3f light2hitPoint = (intersection.hitPoint() - sampleLightPosition).normalized();
+
+            directColor = radiance / r2 *
+                intersection.intersectedObject()->material()->fr(-light2hitPoint, -camera2hitPoint.direction, intersectedObjectNormal) *
+                std::fmax(cos(light.triangles()[0]->normal(), light2hitPoint), 0) *
+                std::fmax(cos(light2hitPoint, -intersectedObjectNormal), 0) /
+                sampleRatio;
+        }
+
 
         // todo: 在光源上 sample 一个点
         // todo: 在当前物体的包围半球上 sample 一个点
-
-        if (util::getRandom01() > 0.6) {
+        //if (false) {
+        if (get_random_float() < 0.8) {
             std::pair<Vec3f, double> sampleIndirectDirectionPair = intersection.intersectedObject()->sampleDirection();
             Vec3f& sampleIndirectDirection = sampleIndirectDirectionPair.first;
             double sampleIndirectDirectionRatio = sampleIndirectDirectionPair.second;
-            double cosNormalOutRay = intersectedObjectNormal.dot(sampleIndirectDirection);
+            double cosNormalOutRay = cos(intersectedObjectNormal, sampleIndirectDirection);
+
+            Vec3f tracedColor = trace(Ray(intersection.hitPoint(), sampleIndirectDirection)) / sampleIndirectDirectionRatio / 0.8;
 
             inDirectColor += intersection.intersectedObject()->material()->fr(sampleIndirectDirection, -camera2hitPoint.direction, intersectedObjectNormal) *
                 cosNormalOutRay *
-                trace(Ray(intersection.hitPoint(), sampleIndirectDirection)) / sampleIndirectDirectionRatio;
+                tracedColor;
         }
 
         return directColor + inDirectColor;
