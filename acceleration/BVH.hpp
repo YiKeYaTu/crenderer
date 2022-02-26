@@ -7,6 +7,7 @@
 
 #include "../object/Triangle.hpp"
 #include "./Bounds3.hpp"
+#include <algorithm>
 
 class BVH {
 private:

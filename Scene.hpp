@@ -69,6 +69,48 @@ public:
     }
 
 private:
+    void sampleLight(Vec3f& radiance, Vec3f& samplePosition, double& sampleRatio) {
+        static double area = 0;
+
+        if (area == 0) {
+            for (const auto& object : objects_) {
+                if (object.material()->isLightSource()) {
+                    const auto& bounds3 = object.bounds3();
+                    double length = bounds3.max().x() - bounds3.min().x();
+                    double width = bounds3.max().z() - bounds3.min().z();
+
+                    area += width * length;
+                }
+            }
+        }
+        
+        double target = util::getRandom01() * area;
+        double currenArea = 0;
+
+        for (const auto& object : objects_) {
+            if (object.material()->isLightSource()) {
+                const auto& bounds3 = object.bounds3();
+                double length = bounds3.max().x() - bounds3.min().x();
+                double width = bounds3.max().z() - bounds3.min().z();
+
+                currenArea += width * length;
+
+                if (currenArea >= target) {
+                    double a = util::getRandom01();
+                    double b = util::getRandom01();
+                    double c = util::getRandom01();
+
+                    radiance = object.material()->e();
+                    samplePosition = Vec3f(
+                        bounds3.min().x() + (bounds3.max().x() - bounds3.min().x()) * a,
+                        bounds3.min().y() + (bounds3.max().y() - bounds3.min().y()) * b,
+                        bounds3.min().z() + (bounds3.max().z() - bounds3.min().z()) * c);
+                    sampleRatio = 1.0f / area;
+                    break;
+                }
+            }
+        }
+    }
     Vec3f trace1object_(const Ray& ray, const MeshTriangle& object) {
         Intersection intersection = object.intersect(ray);
 
@@ -93,7 +135,8 @@ private:
             Intersection intersectWithLight = o.intersect(ray2light);
 
             if (((intersectWithLight.hitPoint() - lightPosition).norm() < 1)) {
-                renderedColor += phongFragmentShader(ray, intersection, o);
+                //renderedColor += phongFragmentShader(ray, intersection, o);
+                pathTraceFragmentShader(ray, intersection, o);
             }
         }
 
@@ -106,12 +149,31 @@ private:
 
         Vec3f directColor;
         Vec3f inDirectColor;
+        // 方向量向外
+        Vec3f intersectedObjectNormal = intersection.intersectedObject()->normal().normalized();
+
+        Vec3f radiance, sampleLightPosition;
+        double sampleRatio;
+
+        sampleLight(radiance, sampleLightPosition, sampleRatio);
+
+        double r2 = std::fpow((sampleLightPosition - intersection.hitPoint()).norm(), 2);
+
+
+        //directColor += radiance / r2;
 
         // todo: 在光源上 sample 一个点
         // todo: 在当前物体的包围半球上 sample 一个点
 
         if (util::getRandom01() > 0.6) {
-            inDirectColor;
+            std::pair<Vec3f, double> sampleIndirectDirectionPair = intersection.intersectedObject()->sampleDirection();
+            Vec3f& sampleIndirectDirection = sampleIndirectDirectionPair.first;
+            double sampleIndirectDirectionRatio = sampleIndirectDirectionPair.second;
+            double cosNormalOutRay = intersectedObjectNormal.dot(sampleIndirectDirection);
+
+            inDirectColor += intersection.intersectedObject()->material()->fr(sampleIndirectDirection, -camera2hitPoint.direction, intersectedObjectNormal) *
+                cosNormalOutRay *
+                trace(Ray(intersection.hitPoint(), sampleIndirectDirection)) / sampleIndirectDirectionRatio;
         }
 
         return directColor + inDirectColor;

@@ -5,9 +5,12 @@
 #ifndef CRENDERER_VECTOR_HPP
 #define CRENDERER_VECTOR_HPP
 
+#include <functional>
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <assert.h>
+
 
 template <typename T = double>
 class Vec;

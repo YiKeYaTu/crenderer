@@ -16,6 +16,14 @@ public:
     const Vec3f& kd() const { return kd_; }
     const Vec3f& ks() const { return ks_; }
 
+    Vec3f fr(const Vec3f& wi, const Vec3f& wo, const Vec3f& normal) const {
+        double cosWiNormal = wi.dot(normal) / wi.norm() / normal.norm();
+        if (cosWiNormal <= 0) {
+            return Vec3f();
+        }
+        return Vec3f(1);
+    }
+
 private:
     bool isLightSource_ = false;
     Vec3f e_;
