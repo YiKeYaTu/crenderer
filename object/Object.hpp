@@ -59,14 +59,6 @@ public:
         }
 
         return std::pair(direction.normalized(), ratio);
-
-
-
-        /*float x_1 = get_random_float(), x_2 = get_random_float();
-        float z = std::fabs(1.0f - 2.0f * x_1);
-        float r = std::sqrt(1.0f - z * z), phi = 2 * util::MY_PI * x_2;
-        Vec3f localRay(r * std::cos(phi), r * std::sin(phi), z);
-        return { toWorld(localRay, normal_), ratio };*/
     }
 
     const Bounds3& bounds3() const { return bounds3_; };

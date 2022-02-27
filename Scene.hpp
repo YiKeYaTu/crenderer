@@ -6,12 +6,12 @@
 #define CRENDERER_SCENE_HPP
 
 #include "Vector.hpp"
-#include "object/MeshTriangle.hpp"
+#include "object/Object.hpp"
 #include <cmath>
 
 class Scene {
 private:
-    std::vector<MeshTriangle> objects_;
+    std::vector<std::shared_ptr<Object>> objects_;
     const unsigned int width_;
     const unsigned int height_;
     std::vector<Vec3f> frameBuffer_;
@@ -25,10 +25,16 @@ public:
     }
     const unsigned int width() const { return width_; }
     const unsigned int height() const { return height_; }
-    void addObject(MeshTriangle& object) { objects_.push_back(object); }
+    void addObject(MeshTriangle& object) { objects_.push_back(std::make_shared<MeshTriangle>(object)); }
 
-    std::vector<Vec3f> render() {
+    std::vector<Vec3f> render(std::size_t spp = 32) {
+        assert(spp > 0);
+
         int m = 0;
+
+        if (bvh_ == nullptr) {
+            bvh_ = BVH::buildBVH(objects_);
+        }
 
         for (uint32_t j = 0; j < height_; ++j) {
             for (uint32_t i = 0; i < width_; ++i) {
@@ -36,14 +42,13 @@ public:
                 float y = (1 - 2 * (j + 0.5) / (float)height_);
 
                 Vec3f dir = Vec3f(-x, y, 1).normalized();
-                int maxK = 16;
 
-                for (int k = 0; k < maxK; ++k) {
+                for (int k = 0; k < spp; ++k) {
                     const Ray ray(cameraPos_, dir);
                     frameBuffer_[m] += trace(ray);
                 }
 
-                frameBuffer_[m] /= maxK;
+                frameBuffer_[m] /= spp;
                 m ++;
             }
             util::UpdateProgress(j / (float)height_);
@@ -53,42 +58,28 @@ public:
         return frameBuffer_;
     }
 
-    std::pair<Intersection, MeshTriangle> intersect(const Ray& ray) {
-        MeshTriangle nearestObject;
-        Intersection nearestIntersection;
-
-        for (const auto& object : objects_) {
-            Intersection itersec = object.intersect(ray);
-            if (itersec.t() < nearestIntersection.t()) {
-                nearestIntersection = itersec;
-                nearestObject = object;
-            }
-        }
-        return { nearestIntersection, nearestObject };
+    Intersection intersect(const Ray& ray) {
+        return BVH::intersect(ray, bvh_);
     }
 
     Vec3f trace(const Ray& ray) {
-        Vec3f renderedColor;
+        Intersection intersection = intersect(ray);
 
-        const auto& p = intersect(ray);
+        if (!intersection.happened()) {
+            return bgColor_;
+        }
 
-        MeshTriangle nearestObject = p.second;
-        Intersection nearestIntersection = p.first;
-
-
-        renderedColor += trace1object_(ray, nearestObject);
-
-        return renderedColor;
+        return pathTraceFragmentShader(ray, intersection);
     }
 
 private:
-    void sampleLight(Vec3f& radiance, Vec3f& samplePosition, double& sampleRatio) {
+    void sampleLight(Object** light, Vec3f& samplePosition, double& sampleRatio) {
         static double area = 0;
 
         if (area == 0) {
             for (const auto& object : objects_) {
-                if (object.material()->isLightSource()) {
-                    const auto& bounds3 = object.bounds3();
+                if (object->material()->isLightSource()) {
+                    const auto& bounds3 = object->bounds3();
                     double length = bounds3.max().x() - bounds3.min().x();
                     double width = bounds3.max().z() - bounds3.min().z();
 
@@ -101,8 +92,8 @@ private:
         double currenArea = 0;
 
         for (const auto& object : objects_) {
-            if (object.material()->isLightSource()) {
-                const auto& bounds3 = object.bounds3();
+            if (object->material()->isLightSource()) {
+                const auto& bounds3 = object->bounds3();
                 double length = bounds3.max().x() - bounds3.min().x();
                 double width = bounds3.max().z() - bounds3.min().z();
 
@@ -113,7 +104,7 @@ private:
                     double b = util::getRandom01();
                     double c = util::getRandom01();
 
-                    radiance = object.material()->e();
+                    *light = object.get();
                     samplePosition = Vec3f(
                         bounds3.min().x() + (bounds3.max().x() - bounds3.min().x()) * a,
                         bounds3.min().y() + (bounds3.max().y() - bounds3.min().y()) * b,
@@ -124,83 +115,36 @@ private:
             }
         }
     }
-    Vec3f trace1object_(const Ray& ray, const MeshTriangle& object) {
-        Intersection intersection = object.intersect(ray);
+ 
 
-        if (!intersection.happened()) {
-            return bgColor_;
-        }
-
-        //if (object.material()->isLightSource()) {
-        //    return Vec3f(1, 1, 1);
-        //}
-
-        const Vec3f hitPoint = intersection.hitPoint();
-        Vec3f renderedColor;
-
-        for (const auto& o : objects_) {
-            if (&o == &object || !o.material()->isLightSource()) {
-                continue;
-            }
-
-            Vec3f lightPosition = o.centroid();
-            Ray ray2light(hitPoint, (lightPosition - hitPoint).normalized());
-
-
-            const auto& p = intersect(ray2light);
-
-            MeshTriangle nearestObject = p.second;
-            Intersection nearestIntersection = p.first;
-
-            // Intersection intersectWithLight = o.intersect(ray2light);
-
-            if ((nearestIntersection.hitPoint() - lightPosition).norm() < 1) {
-                // renderedColor += phongFragmentShader(ray, intersection, o);
-                
-            }
-            renderedColor += pathTraceFragmentShader(ray, intersection, o);
-        }
-
-        return renderedColor;
-    }
-
-    Vec3f pathTraceFragmentShader(const Ray& camera2hitPoint, const Intersection& intersection, const MeshTriangle& light) {
-        Vec3f ks(intersection.intersectedObject()->material()->ks());
-        Vec3f kd(intersection.intersectedObject()->material()->kd());
-
-        //Vec3f directColor;
-        //Vec3f inDirectColor;
-        //// 方向量向外
+    Vec3f pathTraceFragmentShader(const Ray& camera2hitPoint, const Intersection& intersection) {
         Vec3f intersectedObjectNormal = intersection.intersectedObject()->normal().normalized();
 
-        Vec3f radiance, sampleLightPosition;
+        Object** light = new Object*();
+
+        Vec3f sampleLightPosition;
         double sampleRatio;
 
-        sampleLight(radiance, sampleLightPosition, sampleRatio);
+        sampleLight(light, sampleLightPosition, sampleRatio);
 
         Ray ray2light(intersection.hitPoint(), (sampleLightPosition - intersection.hitPoint()).normalized());
-        Intersection intersectWithLight = light.intersect(ray2light);
 
-        const auto& p = intersect(ray2light);
-
-        MeshTriangle nearestObject = p.second;
-        Intersection nearestIntersection = p.first;
-
-        // Intersection intersectWithLight = o.intersect(ray2light);
         Vec3f directColor(0, 0, 0);
         Vec3f inDirectColor(0, 0, 0);
 
-        if ((nearestIntersection.hitPoint() - sampleLightPosition).norm() < 0.1) {
+        if ((intersect(ray2light).hitPoint() - sampleLightPosition).norm() < 0.1) {
             double r = (sampleLightPosition - intersection.hitPoint()).norm();
             double r2 = std::pow(r, 2);
             Vec3f light2hitPoint = (intersection.hitPoint() - sampleLightPosition).normalized();
 
-            directColor = radiance / r2 *
+            directColor = (*light)->material()->e() / r2 *
                 intersection.intersectedObject()->material()->fr(-light2hitPoint, -camera2hitPoint.direction, intersectedObjectNormal) *
-                std::fmax(cos(light.triangles()[0]->normal(), light2hitPoint), 0) *
+                std::fmax(cos(dynamic_cast<MeshTriangle&>(**light).triangles()[0]->normal(), light2hitPoint), 0) *
                 std::fmax(cos(light2hitPoint, -intersectedObjectNormal), 0) /
                 sampleRatio;
         }
+
+        delete light;
 
 
         // todo: 在光源上 sample 一个点

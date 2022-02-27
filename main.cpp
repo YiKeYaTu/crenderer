@@ -17,7 +17,7 @@ void renderBunny() {
     MeshTriangle bunny = MeshTriangle::loadObjectFromObjFile(prefix + "bunny/bunny.obj", redMaterial);
     MeshTriangle bunnyLight = MeshTriangle::loadObjectFromObjFile(prefix + "bunny/bunny_light.obj", lightMaterial);
 
-    Scene scene(800, 800, Vec3f(0, 0.065, -0.2), Vec3f(0.2, 0.3, 0.4));
+    Scene scene(300, 300, Vec3f(0, 0.065, -0.2), Vec3f(0.2, 0.3, 0.4));
     scene.addObject(bunny);
     scene.addObject(bunnyLight);
 
@@ -41,7 +41,7 @@ void renderCornellBox() {
     MeshTriangle shortbox = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/shortbox.obj", whiteMaterial);
     MeshTriangle light = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/light.obj", lightMaterial);
 
-    Scene scene(800, 800, Vec3f(278, 273, -800), Vec3f());
+    Scene scene(300, 300, Vec3f(278, 273, -800), Vec3f());
 
     scene.addObject(floor);
     scene.addObject(left);
