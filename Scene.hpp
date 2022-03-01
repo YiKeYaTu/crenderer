@@ -65,14 +65,14 @@ public:
         return BVH::intersect(ray, bvh_);
     }
 
-    Vec3f trace(const Ray& ray) {
+    Vec3f trace(const Ray& ray, int depth = 0) {
         Intersection intersection = intersect(ray);
 
         if (!intersection.happened()) {
             return bgColor_;
         }
 
-        return pathTraceFragmentShader(ray, intersection);
+        return pathTraceFragmentShader(ray, intersection, depth);
     }
 
 private:
@@ -120,13 +120,20 @@ private:
     }
  
 
-    Vec3f pathTraceFragmentShader(const Ray& camera2hitPoint, const Intersection& intersection) {
+    Vec3f pathTraceFragmentShader(const Ray& camera2hitPoint, const Intersection& intersection, int depth) {
         Vec3f intersectedObjectNormal = intersection.intersectedObject()->normal().normalized();
 
         Object** light = new Object*();
 
         Vec3f sampleLightPosition;
         double sampleRatio;
+
+        if (intersection.intersectedObject()->material()->isLightSource()) {
+            if (depth == 0) {
+                return intersection.intersectedObject()->material()->e();
+            }
+            return Vec3f();
+        }
 
         sampleLight(light, sampleLightPosition, sampleRatio);
 
@@ -159,7 +166,7 @@ private:
             double sampleIndirectDirectionRatio = sampleIndirectDirectionPair.second;
             double cosNormalOutRay = cos(intersectedObjectNormal, sampleIndirectDirection);
 
-            Vec3f tracedColor = trace(Ray(intersection.hitPoint(), sampleIndirectDirection)) / sampleIndirectDirectionRatio / 0.8;
+            Vec3f tracedColor = trace(Ray(intersection.hitPoint(), sampleIndirectDirection), depth + 1) / sampleIndirectDirectionRatio / 0.8;
 
             inDirectColor += intersection.intersectedObject()->material()->fr(sampleIndirectDirection, -camera2hitPoint.direction, intersectedObjectNormal) *
                 cosNormalOutRay *

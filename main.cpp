@@ -51,7 +51,7 @@ void renderCornellBox() {
     scene.addObject(light);
 
     auto start = std::chrono::system_clock::now();
-    std::vector<Vec3f> frameBuffer = scene.render(1);
+    std::vector<Vec3f> frameBuffer = scene.render(16);
     auto stop = std::chrono::system_clock::now();
 
     util::saveFrameBufferAsPPM("cornellBox.ppm", frameBuffer, scene.width(), scene.height());
