@@ -156,9 +156,6 @@ private:
 
         delete light;
 
-
-        // todo: 在光源上 sample 一个点
-        // todo: 在当前物体的包围半球上 sample 一个点
         //if (false) {
         if (get_random_float() < 0.8) {
             std::pair<Vec3f, double> sampleIndirectDirectionPair = intersection.intersectedObject()->sampleDirection();

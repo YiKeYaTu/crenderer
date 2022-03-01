@@ -15,8 +15,8 @@ constexpr double MY_PI = 3.14159265358979323846;
 double getRandom01() {
     static std::random_device dev;
     static std::mt19937 rng(dev());
-    static std::uniform_int_distribution<std::mt19937::result_type> dist01(0, 1000);
-    return static_cast<double>(dist01(rng)) / 1000;
+    static std::uniform_int_distribution<double> dist01(0, 1);
+    return dist01(rng);
 }
 std::vector<std::string> split(std::string& s, const std::string& separator) {
     std::vector<std::string> tokens;

@@ -20,20 +20,6 @@ inline float get_random_float()
     return dist(rng);
 }
 
-Vec3f toWorld(const Vec3f& a, const Vec3f& N) {
-    Vec3f B, C;
-    if (std::fabs(N.x()) > std::fabs(N.y())) {
-        float invLen = 1.0f / std::sqrt(N.x() * N.x() + N.z() * N.z());
-        C = Vec3f(N.z() * invLen, 0.0f, -N.x() * invLen);
-    }
-    else {
-        float invLen = 1.0f / std::sqrt(N.y() * N.y() + N.z() * N.z());
-        C = Vec3f(0.0f, N.z() * invLen, -N.y() * invLen);
-    }
-    B = cross(C, N);
-    return B * a.x()  + C * a.y() + N * a.z();
-}
-
 extern class Intersection;
 
 class Object {
