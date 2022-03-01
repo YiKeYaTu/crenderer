@@ -6,7 +6,7 @@
 #include "acceleration/BVH.hpp"
 #include "Scene.hpp"
 
-const std::string prefix = "G:/crenderer/models/";
+const std::string prefix = "../models/";
 
 Material redMaterial(Vec3f(0.63f, 0.065f, 0.05f), Vec3f());
 Material greenMaterial(Vec3f(0.14f, 0.45f, 0.091f), Vec3f());
@@ -17,7 +17,7 @@ void renderBunny() {
     MeshTriangle bunny = MeshTriangle::loadObjectFromObjFile(prefix + "bunny/bunny.obj", redMaterial);
     MeshTriangle bunnyLight = MeshTriangle::loadObjectFromObjFile(prefix + "bunny/bunny_light.obj", lightMaterial);
 
-    Scene scene(300, 300, Vec3f(0, 0.065, -0.2), Vec3f(0.2, 0.3, 0.4));
+    Scene scene(400, 300, Vec3f(0, 0.065, -0.2), Vec3f(0.2, 0.3, 0.4));
     scene.addObject(bunny);
     scene.addObject(bunnyLight);
 
@@ -41,7 +41,7 @@ void renderCornellBox() {
     MeshTriangle shortbox = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/shortbox.obj", whiteMaterial);
     MeshTriangle light = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/light.obj", lightMaterial);
 
-    Scene scene(300, 300, Vec3f(278, 273, -800), Vec3f());
+    Scene scene(400, 300, Vec3f(278, 273, -800), Vec3f());
 
     scene.addObject(floor);
     scene.addObject(left);
@@ -51,7 +51,7 @@ void renderCornellBox() {
     scene.addObject(light);
 
     auto start = std::chrono::system_clock::now();
-    std::vector<Vec3f> frameBuffer = scene.render();
+    std::vector<Vec3f> frameBuffer = scene.render(1);
     auto stop = std::chrono::system_clock::now();
 
     util::saveFrameBufferAsPPM("cornellBox.ppm", frameBuffer, scene.width(), scene.height());

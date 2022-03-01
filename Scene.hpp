@@ -14,13 +14,14 @@ private:
     std::vector<std::shared_ptr<Object>> objects_;
     const unsigned int width_;
     const unsigned int height_;
+    const double fov_;
     std::vector<Vec3f> frameBuffer_;
     Vec3f cameraPos_;
     Vec3f bgColor_;
     std::shared_ptr<BVH> bvh_;
 public:
-    Scene(const unsigned int width, const unsigned int height, const Vec3f& cameraPos, const Vec3f& bgColor)
-    : width_(width), height_(height), cameraPos_(cameraPos), bgColor_(bgColor) {
+    Scene(const unsigned int width, const unsigned int height, const Vec3f& cameraPos, const Vec3f& bgColor, const double fov = 45)
+    : width_(width), height_(height), cameraPos_(cameraPos), bgColor_(bgColor), fov_(fov) {
         frameBuffer_.resize(width * height);
     }
     const unsigned int width() const { return width_; }
@@ -31,6 +32,8 @@ public:
         assert(spp > 0);
 
         int m = 0;
+        double aspectRatio = static_cast<double>(width_) / height_;
+        double scale = std::tan((fov_ / 2) / 180 * util::MY_PI);
 
         if (bvh_ == nullptr) {
             bvh_ = BVH::buildBVH(objects_);
@@ -38,8 +41,8 @@ public:
 
         for (uint32_t j = 0; j < height_; ++j) {
             for (uint32_t i = 0; i < width_; ++i) {
-                float x = (2 * (i + 0.5) / (float)width_ - 1);
-                float y = (1 - 2 * (j + 0.5) / (float)height_);
+                float x = (2 * (i + 0.5) / (float)width_ - 1) * aspectRatio * scale;
+                float y = (1 - 2 * (j + 0.5) / (float)height_) * scale;
 
                 Vec3f dir = Vec3f(-x, y, 1).normalized();
 
