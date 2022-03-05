@@ -10,15 +10,7 @@
 #include "../Vector.hpp"
 #include "../acceleration/Bounds3.hpp"
 #include "../Ray.hpp"
-
-inline float get_random_float()
-{
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_real_distribution<float> dist(0.f, 1.f); // distribution in range [1, 6]
-
-    return dist(rng);
-}
+#include "../material/CommonMaterial.hpp"
 
 extern class Intersection;
 
@@ -47,16 +39,18 @@ public:
         return std::pair(direction.normalized(), ratio);
     }
 
+    virtual const Vec3f computeNormal(const Vec3f& p) const = 0;
+
     const Bounds3& bounds3() const { return bounds3_; };
     const Vec3f& centroid() const { return centroid_; }
-    const Vec3f& normal() const { return normal_; }
-    const Material* material() const { return material_; }
+    const Vec3f& normal(const Vec3f& p) const { return computeNormal(p); }
+    const CommonMaterial* material() const { return material_; }
 
 protected:
     Bounds3 bounds3_;
     Vec3f centroid_;
     Vec3f normal_;
-    mutable const Material* material_;
+    mutable const CommonMaterial* material_;
 };
 
 #endif //CRENDERER_GEOMETRY_HPP

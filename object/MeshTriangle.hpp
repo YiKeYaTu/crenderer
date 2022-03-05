@@ -13,21 +13,22 @@
 #include "Triangle.hpp"
 #include "../acceleration/BVH.hpp"
 #include "../utils/OBJLoader.hpp"
+#include "../material/CommonMaterial.hpp"
 
 class MeshTriangle : public Object {
 public:
-    static MeshTriangle loadObjectFromObjFile(const std::string &, const Material& material);
+    static MeshTriangle loadObjectFromObjFile(const std::string &, const CommonMaterial& material);
     MeshTriangle() = default;
-    MeshTriangle(const std::vector<Vec3f> &vertexes, const std::vector<std::size_t> indexes, const Material* material) {
+    MeshTriangle(const std::vector<Vec3f> &vertexes, const std::vector<std::size_t> indexes, const CommonMaterial* material) {
         material_ = material;
         for (int i = 0; i < static_cast<int>(indexes.size()) - 2; i += 3) {
             auto a = vertexes[indexes[i + 0]];
             auto b = vertexes[indexes[i + 1]];
             auto c = vertexes[indexes[i + 2]];
-            triangles_.push_back(std::make_shared<Triangle>(Triangle(a, b, c, material_)));
+            triangles_.push_back(new Triangle(a, b, c, material_));
         }
         bvh_ = BVH::buildBVH(triangles_);
-        for (const std::shared_ptr<Object>& object : triangles_) {
+        for (Object* object : triangles_) {
             centroid_ += object->centroid();
         }
         centroid_ /= triangles_.size();
@@ -37,14 +38,18 @@ public:
     : MeshTriangle(vertexes, indexes, nullptr) {}
 
     virtual Intersection intersect(const Ray& ray) const override { return BVH::intersect(ray, bvh_); }
-    std::vector<std::shared_ptr<Object>> triangles() const { return triangles_; }
+    const std::vector<Object*>& triangles() const { return triangles_; }
+
+    virtual const Vec3f computeNormal(const Vec3f& p) const override {
+        return triangles_[0]->computeNormal(p);
+    }
 
 private:
-    std::vector<std::shared_ptr<Object>> triangles_;
+    std::vector<Object*> triangles_;
     std::shared_ptr<BVH> bvh_;
 };
 
-MeshTriangle MeshTriangle::loadObjectFromObjFile(const std::string &fileName, const Material& material) {
+MeshTriangle MeshTriangle::loadObjectFromObjFile(const std::string &fileName, const CommonMaterial& material) {
     OBJLoader loader(fileName);
 
     try {

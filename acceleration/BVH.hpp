@@ -13,10 +13,10 @@ class BVH {
 private:
     std::shared_ptr<BVH> left_;
     std::shared_ptr<BVH> right_;
-    std::shared_ptr<Object> geometry_;
+    Object* geometry_;
     Bounds3 bounds3_;
 
-    static std::shared_ptr<BVH> buildBVH_(std::vector<std::shared_ptr<Object>>& objects, int axis, int lo, int hi) {
+    static std::shared_ptr<BVH> buildBVH_(std::vector<Object*>& objects, int axis, int lo, int hi) {
         if (lo >= hi) {
             return nullptr;
         }
@@ -28,10 +28,10 @@ private:
         std::shared_ptr<BVH> bvh = std::make_shared<BVH>();
         std::vector<Bounds3> bounds3s;
 
-        std::transform(objects.begin() + lo, objects.begin() + hi, std::inserter(bounds3s, bounds3s.begin()), [](std::shared_ptr<Object>& object) {
+        std::transform(objects.begin() + lo, objects.begin() + hi, std::inserter(bounds3s, bounds3s.begin()), [](Object* object) {
             return object->bounds3();
         });
-        std::sort(objects.begin() + lo, objects.begin() + hi, [axis](std::shared_ptr<Object>& object1, std::shared_ptr<Object>& object2) {
+        std::sort(objects.begin() + lo, objects.begin() + hi, [axis](Object* object1, Object* object2) {
             return object1->centroid()[axis] < object2->centroid()[axis];
         });
 
@@ -46,14 +46,14 @@ private:
 
 public:
     BVH() { }
-    BVH(const std::shared_ptr<BVH> &left, const std::shared_ptr<BVH> &right, const std::shared_ptr<Object> &geometry,
+    BVH(const std::shared_ptr<BVH> &left, const std::shared_ptr<BVH> &right, Object* geometry,
         const Bounds3 &bounds3) : left_(left), right_(right), geometry_(geometry), bounds3_(bounds3) {}
 
-    static std::shared_ptr<BVH> buildBVH(std::vector<std::shared_ptr<Object>>& objects) {
+    static std::shared_ptr<BVH> buildBVH(std::vector<Object*>& objects) {
         return buildBVH_(objects, 0, 0, objects.size());
     }
 
-    std::shared_ptr<Object> geometry() { return geometry_; }
+    Object* geometry() { return geometry_; }
     Bounds3 bounds3() { return bounds3_; }
     std::shared_ptr<BVH> left() { return left_; }
     std::shared_ptr<BVH> right() { return right_; }

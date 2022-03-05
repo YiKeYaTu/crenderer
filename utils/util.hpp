@@ -9,14 +9,17 @@
 #include <cmath>
 #include <string>
 #include <random>
+#include <queue>
+#include <thread>
+#include <map>
 
 namespace util {
 constexpr double MY_PI = 3.14159265358979323846;
 double getRandom01() {
     static std::random_device dev;
     static std::mt19937 rng(dev());
-    static std::uniform_int_distribution<double> dist01(0, 1);
-    return dist01(rng);
+    static std::uniform_real_distribution<float> dist(0.f, 1.f);
+    return dist(rng);
 }
 std::vector<std::string> split(std::string& s, const std::string& separator) {
     std::vector<std::string> tokens;
@@ -68,7 +71,14 @@ void saveFrameBufferAsPPM(const char* fileName, std::vector<Vec3f>& frameBuffer,
 
 void UpdateProgress(float progress)
 {
+    static float prevProgress = 0.0;
     int barWidth = 70;
+
+    if (prevProgress > progress) {
+        return;
+    }
+
+    prevProgress = progress;
 
     std::cout << "[";
     int pos = barWidth * progress;
@@ -79,6 +89,63 @@ void UpdateProgress(float progress)
     }
     std::cout << "] " << int(progress * 100.0) << " %\r";
     std::cout.flush();
+};
+
+class ThreadPool {
+private:
+    std::queue<const std::function<void()>> waitList_;
+    std::map<int, std::thread> threads;
+
+    std::size_t limit_;
+    std::mutex m_;
+    std::condition_variable condEmpty_;
+    std::condition_variable condFull_;
+    bool stop_ = false;
+public:
+    ThreadPool(std::size_t limit, std::size_t numThread) {
+        for (int i = 0; i < numThread; ++i) {
+            threads.insert({ i, std::thread([&]{
+                while (true) {
+                    std::unique_lock uniqueLock(m_);
+                    bool f = condFull_.wait_for(uniqueLock, std::chrono::seconds(1), [&]{ return waitList_.size() > 0; });
+
+                    if (f && waitList_.size() > 0) {
+                        auto front = waitList_.front();
+                        waitList_.pop();
+                        uniqueLock.unlock();
+//                        condEmpty_.notify_one();
+
+                        try {
+                            front();
+                        } catch (std::exception& e) {
+                            std::cout << e.what() << std::endl;
+                            return;
+                        }
+                    } else if (stop_) {
+                        std::cout << "stop!!" << std::endl;
+                        return;
+                    }
+                }
+            })});
+        }
+    }
+
+    void allJoin() {
+        for (auto& thread : threads) {
+            thread.second.join();
+        }
+    }
+
+    void stop() {
+        stop_ = true;
+    }
+
+    void tryAppendTask(const std::function<void()>& task) {
+        std::unique_lock lockGuard(m_);
+//        condEmpty_.wait(lockGuard, [&]{ return waitList_.size() < limit_; });
+        waitList_.push(task);
+        condFull_.notify_one();
+    }
 };
 }
 

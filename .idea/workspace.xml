@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="crenderer" targetName="crenderer" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="78897feb-7e53-4746-8860-242c4d981831" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene.sce" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene1.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene1.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene1.sce" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene2.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene2.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene2.sce" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene3.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene3.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene3.sce" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene4.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene4.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene4.sce" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene5.mtl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene5.obj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/scenes/scene5.sce" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Intersection.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/Intersection.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ray.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/Ray.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scene.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/Scene.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Vector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/Vector.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/acceleration/BVH.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/acceleration/BVH.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/acceleration/Bounds3.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/acceleration/Bounds3.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/crenderer.dir/main.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/crenderer.dir/main.cpp.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/cornellVolumeBox.ppm" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/cornellVolumeBox.ppm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/crenderer" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/crenderer" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/material/CommonLightMaterial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/CommonLightMaterial.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/material/CommonMaterial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/CommonMaterial.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/material/SpotLightMaterial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/SpotLightMaterial.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/material/property/DiffuseProperty.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/property/DiffuseProperty.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/material/property/Property.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/property/Property.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/material/property/SpecularProperty.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/property/SpecularProperty.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/MeshTriangle.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/object/MeshTriangle.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/Object.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/object/Object.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/Sphere.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/object/Sphere.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/object/Triangle.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/object/Triangle.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sample.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/sample.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shader/PathTraceShader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/shader/PathTraceShader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shader/Shader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/shader/Shader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shader/VolumeLightShader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/shader/VolumeLightShader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/util.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/utils/util.hpp" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2021" />
+    <option name="minorVersion" value="3.2" />
+  </component>
+  <component name="ProjectId" id="25meC17KGPtzoXf11RvVQB7iV0I" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="cidr.known.project.marker" value="true" />
+    <property name="cmake.loaded.for.project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/material/Property" />
+      <recent name="$PROJECT_DIR$/material" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="crenderer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="crenderer" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="crenderer" RUN_TARGET_NAME="crenderer">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="78897feb-7e53-4746-8860-242c4d981831" name="Changes" comment="" />
+      <created>1646136567892</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1646136567892</updated>
+      <workItem from="1646136569019" duration="93768000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

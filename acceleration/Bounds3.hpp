@@ -23,8 +23,8 @@ public:
         return os;
     }
     static Bounds3 computeBounds3(const std::vector<Vec3f>& vectors) {
-        Vec3f minBounds3 = Vec3f::min((const std::vector<Vec<double>> &) vectors);
-        Vec3f maxBounds3 = Vec3f::max((const std::vector<Vec<double>> &) vectors);
+        Vec3f minBounds3 = Vec3f::min(vectors);
+        Vec3f maxBounds3 = Vec3f::max(vectors);
         return Bounds3(minBounds3, maxBounds3);
     }
     static Bounds3 computeBounds3(const std::vector<Bounds3>& bounds3s) {

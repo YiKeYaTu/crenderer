@@ -9,12 +9,17 @@
 
 class Ray {
 public:
+    static const double s;
     const Vec3f origin;
     const Vec3f direction;
     const Vec3f recDirection;
 
-    Ray(const Vec3f &origin, const Vec3f &direction)
-    : origin(origin), direction(direction), recDirection(1 / direction.x(), 1 / direction.y(), 1 / direction.z()) {}
+    Ray(const Vec3f &origin, const Vec3f &d)
+    : origin(origin), direction(d.normalized() * s), recDirection(1.0f / direction.x(), 1.0f / direction.y(), 1.0f / direction.z()) {
+
+    }
 };
+
+const double Ray::s = 100.0;
 
 #endif //CRENDERER_RAY_HPP

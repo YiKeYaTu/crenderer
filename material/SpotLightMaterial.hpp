@@ -5,23 +5,36 @@
 #ifndef CRENDERER_LIGHTMATERIAL_HPP
 #define CRENDERER_LIGHTMATERIAL_HPP
 
-#include "Vector.hpp"
-#include "utils/util.hpp"
+#include "../Vector.hpp"
+#include "../utils/util.hpp"
+#include "CommonLightMaterial.hpp"
 
-class SpotlightMaterial {
+class SpotlightMaterial: public CommonLightMaterial {
 public:
-    const double theta = 45 / 180 * util::MY_PI;
-    const Vec3f normal;
+    static double defaultTheta;
 
-    const Vec3f& e(Vec3f& point2light) const {
-        double c = cos(point2light, -normal);
+    SpotlightMaterial() = default;
+    SpotlightMaterial(const Vec3f &kd, const Vec3f &ks, const Vec3f &e, double theta = defaultTheta): CommonLightMaterial(kd, ks, e), theta(theta) {}
 
-        if (c > std::cos(theta)) {
-            return Vec3f(0, 0, 0);
+    const double theta;
+    const Vec3f zeroEmission;
+
+    virtual const Vec3f getEmission(const Vec3f& light2point, const Vec3f& normal) const override {
+        double c = cos(light2point, normal);
+
+        if (c < std::cos(theta)) {
+            if (c < 0) {
+                return zeroEmission;
+            } else {
+                return emission_ * std::pow(c / std::cos(theta), 40);
+            }
         }
 
-        return e;l
+        return emission_;
     }
+
 };
+
+double SpotlightMaterial::defaultTheta =  20.0f / 180 * util::MY_PI;
 
 #endif //CRENDERER_LIGHTMATERIAL_HPP

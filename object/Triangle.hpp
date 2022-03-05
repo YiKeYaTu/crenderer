@@ -8,6 +8,7 @@
 #include "../Vector.hpp"
 #include "Object.hpp"
 #include "../acceleration/Bounds3.hpp"
+#include "../material/CommonMaterial.hpp"
 
 class Triangle: public Object {
     friend std::ostream &operator<<(std::ostream &os, const Triangle &t) {
@@ -19,14 +20,18 @@ class Triangle: public Object {
     }
 public:
     explicit Triangle(const Vec3f &v0, const Vec3f &v1, const Vec3f &v2): Triangle(v0, v1, v2, nullptr) {}
-    explicit Triangle(const Vec3f &v0, const Vec3f &v1, const Vec3f &v2, const Material* material):
+    explicit Triangle(const Vec3f &v0, const Vec3f &v1, const Vec3f &v2, const CommonMaterial* material):
         v0_(v0), v1_(v1), v2_{v2},
         e0_(v1 - v0), e1_(v2 - v1), e2_(v0 - v2) {
             material_ = material;
             centroid_ = (v0 + v1 + v2) / 3;
             bounds3_ = Bounds3::computeBounds3({ v0, v1, v2 });
-            normal_ = cross(e0_, e1_);
+            normal_ = crossProduct(e0_, e1_);
         };
+
+    virtual const Vec3f computeNormal(const Vec3f& p) const override {
+        return normal_;
+    }
 
     virtual Intersection intersect(const Ray& ray) const override {
         Vec3f o = ray.origin;
@@ -60,7 +65,7 @@ public:
         Vec3f hitPoint(v0_*a + v1_*b + v2_*c);
         double distance = (ray.direction*t).norm();
 
-        return Intersection(t, a, b, c, distance, hitPoint + normal_.normalized() * 0.00001, this);
+        return Intersection(t, std::numeric_limits<double>::max(), a, b, c, distance, hitPoint + normal_.normalized() * 0.00001, this);
     };
 private:
     Vec3f v0_, v1_, v2_;
