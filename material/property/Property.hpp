@@ -1,0 +1,8 @@
+//
+// Created by lc on 2022/3/4.
+//
+
+#ifndef CRENDERER_PROPERTY_HPP
+#define CRENDERER_PROPERTY_HPP
+
+#endif //CRENDERER_PROPERTY_HPP
