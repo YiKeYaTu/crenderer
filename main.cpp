@@ -105,7 +105,7 @@ void renderCornellVolumeBox() {
 
 //    Scene scene(100, 100, Vec3f(278, 273, -800), Vec3f(), 45);
 
-    Scene scene(300, 300, Vec3f(278, 273, -700), Vec3f(), 45);
+    Scene scene(1920, 1080, Vec3f(278, 273, -700), Vec3f(), 45);
     scene.addObject(&left);
     scene.addObject(&right);
     scene.addObject(&light);
@@ -122,7 +122,7 @@ void renderCornellVolumeBox() {
     scene.setShader(&volumeLightShader);
 
     auto start = std::chrono::system_clock::now();
-    std::vector<Vec3f> frameBuffer = scene.render(2);
+    std::vector<Vec3f> frameBuffer = scene.render(32);
     auto stop = std::chrono::system_clock::now();
 
     util::saveFrameBufferAsPPM("cornellVolumeBox.ppm", frameBuffer, scene.width(), scene.height());

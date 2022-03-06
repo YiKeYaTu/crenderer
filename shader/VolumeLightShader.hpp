@@ -30,30 +30,66 @@ private:
         Vec3f sampledLightNormal;
         Vec3f sampledEmission;
 
+        Ray ray2light;
+
         bool canReachLight;
-        double distanceToLight;
     };
 
-    SampledLight sampleLight(Vec3f& point) {
+    struct ComputedTransmittance {
+        Intersection iterObject;
+        Intersection iterVolume;
+
+        double tEnterVolume;
+        double tLeaveVolume;
+        double tInVolume;
+        double transmittance;
+    };
+
+    ComputedTransmittance computeTransmittance_(const Ray& ray2somewhere) {
+        double transmittance = 1.0, tEnterVolume, tLeaveVolume, tInVolume;
+
+        Intersection iterObject = scene_->intersect(ray2somewhere);
+        Intersection iterVolume = scene_->intersectVolume(ray2somewhere);
+
+        if (iterVolume.happened()) {
+            tEnterVolume = fmin( iterVolume.t(), iterObject.t() );
+            tLeaveVolume = fmin( iterObject.t(), iterVolume.tMax() );
+            tInVolume = tLeaveVolume - fmax( tEnterVolume, 0 );
+            transmittance = exp( -sigT * tInVolume );
+        } else {
+            tEnterVolume = tLeaveVolume = tInVolume = 0;
+        }
+
+        return ComputedTransmittance{
+            iterObject, iterVolume,
+            tEnterVolume, tLeaveVolume, tInVolume, transmittance
+        };
+    }
+
+    SampledLight sampleLight_(const Vec3f& point) {
         Object **light = new Object *();
         Vec3f sampledLightPosition;
         double sampleRatio;
         scene_->sampleLight(light, sampledLightPosition, sampleRatio);
 
+        double r2 = pow( ( point - sampledLightPosition ).norm(), 2 );
         Vec3f light2point = (point - sampledLightPosition).normalized();
 
         Vec3f sampledLightNormal = (*light)->computeNormal(sampledLightPosition);
-        Vec3f sampledEmission = (*light)->material()->getEmission(light2point, sampledLightNormal);
+        // projection light area to the half sphere
+        Vec3f sampledEmission = (*light)->material()->getEmission(light2point, sampledLightNormal)
+                * (1.0 / r2)
+                * std::fmax(cos(sampledLightNormal, light2point), 0);
 
         Ray ray2light(point, (sampledLightPosition - point).normalized());
         auto intersectionWithLight = scene_->intersect(ray2light);
         bool canReachLight = (intersectionWithLight.hitPoint() - sampledLightPosition).norm() < 0.1;
-        double distanceToLight = (point - sampledLightPosition).norm();
 
         return SampledLight{
             light, intersectionWithLight, sampleRatio,
             sampledLightPosition, sampledLightNormal, sampledEmission,
-            canReachLight, distanceToLight
+            ray2light,
+            canReachLight
         };
     }
 public:
@@ -106,64 +142,34 @@ public:
         depth ++;
 
         double russiaRatio = 1.0;
-        if (depth > 5) { russiaRatio = 0.5;}
+        if (depth > 5) { russiaRatio = 0.5; }
 
         Vec3f surfaceColor, particleColor;
 
-        Intersection* iterObject = new Intersection();
-        Intersection* iterVolume = new Intersection();
+        ComputedTransmittance computedTransmittance = computeTransmittance_(ray);
 
-        double tEnterVolume, tLeaveVolume;
-        double transmittance = computeTransmittance(ray, iterObject, iterVolume, tEnterVolume, tLeaveVolume);
-
-        auto samplePair = sampleScattering(sigT,fmax( tEnterVolume, 0 ));
+        auto samplePair = sampleScattering(sigT, fmax( computedTransmittance.tEnterVolume, 0 ));
         double sampledScatteringT = samplePair.first;
         double tPDF = samplePair.second;
 
-        if (iterVolume && iterVolume->happened()) {
+        if (computedTransmittance.iterVolume.happened()) {
             Vec3f particlePosition = ray.origin + ray.direction * sampledScatteringT;
             // if ray doesn't intersect any object,
             // or the sampled time lesser than intersected time
-            if (!iterObject->happened() || sampledScatteringT < iterObject->t()) {
-                particleColor += shadeParticle_(ray, depth, russiaRatio, samplePair, tEnterVolume);
+            if (!computedTransmittance.iterObject.happened() || sampledScatteringT < computedTransmittance.iterObject.t()) {
+                particleColor += shadeParticle_(ray, depth, russiaRatio, samplePair, computedTransmittance);
             }
         }
 
-        if (iterObject->happened() && sampledScatteringT >= iterObject->t()) {
-            surfaceColor += shadeSurface_(ray, depth, russiaRatio, iterObject, transmittance, tEnterVolume, tLeaveVolume);
+        if (computedTransmittance.iterObject.happened() && sampledScatteringT >= computedTransmittance.iterObject.t()) {
+            surfaceColor += shadeSurface_(ray, depth, russiaRatio, computedTransmittance);
         }
-
-        delete iterObject;
-        delete iterVolume;
 
         return surfaceColor + particleColor;
     }
 
 private:
-    double computeTransmittance(
-        const Ray& ray2somewhere,
-        Intersection* iterObject,
-        Intersection* iterVolume,
-        double& tEnterVolume,
-        double& tLeaveVolume
-    ) {
-        double transmittance = 1.0;
-
-        *iterObject = scene_->intersect(ray2somewhere);
-        *iterVolume = scene_->intersectVolume(ray2somewhere);
-
-        if (iterVolume->happened()) {
-            tEnterVolume = fmin( iterVolume->t(), iterObject->t() );
-            tLeaveVolume = fmin( iterObject->t(), iterVolume->tMax() );
-            transmittance = exp( -sigT * ( tLeaveVolume - tEnterVolume ) );
-        } else {
-            tEnterVolume = tLeaveVolume = 0;
-        }
-
-        return transmittance;
-    }
-
-    Vec3f shadeParticle_(const Ray& ray, int depth, double russiaRatio, std::pair<double, double>& pair, double tEnterVolume) {
+    Vec3f shadeParticle_(const Ray& ray, int depth, double russiaRatio, std::pair<double, double>& pair, ComputedTransmittance& computedTransmittance) {
         double sampledScatteringT = pair.first;
         double tPDF = pair.second;
 
@@ -171,39 +177,15 @@ private:
         Vec3f particleColor;
 
         if (enableSampleLight) {
-            Object **particleLight = new Object* ();
-            Vec3f sampleParticleLightPosition;
-            double sampleParticleRatio;
-            scene_->sampleLight(particleLight, sampleParticleLightPosition, sampleParticleRatio);
-
-            Vec3f particleLightNormal = (*particleLight)->computeNormal(sampleParticleLightPosition);
-            Vec3f light2particle = (particlePosition - sampleParticleLightPosition).normalized();
-            Ray ray2light(sampleParticleLightPosition, (sampleParticleLightPosition - particlePosition).normalized());
-
-            auto intersectionWithLight = scene_->intersect(ray2light);
-
-            if ((intersectionWithLight.hitPoint() - sampleParticleLightPosition).norm() < 0.1) {
-                double r = (particlePosition - sampleParticleLightPosition).norm();
-                double r2 = std::pow(r, 2);
-                double particleLightTransmittance = 1.0;
-
-                auto intersectionWithLightVolume = scene_->intersectVolume(ray2light);
-                double tEnterParticleLightVolume = std::numeric_limits<double>::max(), tOutParticleLightVolume = tEnterParticleLightVolume;
-
-                if (intersectionWithLightVolume.happened()) {
-                    tOutParticleLightVolume = fmin(intersectionWithLight.t(), intersectionWithLightVolume.tMax());
-                    tEnterParticleLightVolume = intersectionWithLightVolume.t();
-                    particleLightTransmittance = exp( -sigT * fmax( tOutParticleLightVolume - tEnterParticleLightVolume, 0 ) );
-                }
-
-                particleColor += (*particleLight)->material()->getEmission(light2particle, particleLightNormal)
-                                 * (1.0 / r2)
-                                 * std::fmax(cos(particleLightNormal, light2particle), 0)
-                                 * particleLightTransmittance
+            SampledLight sampledLightObj = sampleLight_(particlePosition);
+            if (sampledLightObj.canReachLight) {
+                ComputedTransmittance computedTransmittance = computeTransmittance_(sampledLightObj.ray2light);
+                particleColor += sampledLightObj.sampledEmission
+                                 * computedTransmittance.transmittance
                                  * (1.0 / 1.0)
-                                 * Schlick(ray2light.direction, -ray.direction, 0.5)
+                                 * Schlick(sampledLightObj.ray2light.direction, -ray.direction, 0.5)
                                  * (sigS / sigT)
-                                 * (1.0 / sampleParticleRatio);
+                                 * (1.0 / sampledLightObj.sampleRatio);
             }
         }
         if (util::getRandom01() < russiaRatio) {
@@ -215,10 +197,11 @@ private:
 
             if (!nextIter.happened() || !nextIter.intersectedObject()->material()->hasEmission()) {
                 Vec3f tracedColor = scene_->trace(particle2random, depth);
-                Vec3f indirectParticleColor = (tracedColor
-                                               * Schlick(sampleIndirectDirectionPair.first, -ray.direction, 0.5)
-                                               * (sigS / sigT)
-                                               * (1.0f / sampleIndirectDirectionPair.second)) * (1.0f / russiaRatio);
+                Vec3f indirectParticleColor = tracedColor
+                        * Schlick(sampleIndirectDirectionPair.first, -ray.direction, 0.5)
+                        * (sigS / sigT)
+                        * (1.0f / sampleIndirectDirectionPair.second)
+                        * (1.0f / russiaRatio);
 
                 particleColor += indirectParticleColor;
             }
@@ -226,64 +209,45 @@ private:
 
         particleColor = particleColor
                         * sigT
-                        * std::exp( -sigT * ( tEnterVolume >= 0 ? (sampledScatteringT - tEnterVolume) : sampledScatteringT ) )
+                        * std::exp( -sigT * ( computedTransmittance.tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance.tEnterVolume) : sampledScatteringT ) )
                         * (1.0f / tPDF);
         return particleColor;
     }
 
-    Vec3f shadeSurface_(const Ray& ray, int depth, double russiaRatio, const Intersection* iterObject, double transmittance, double tEnterVolume, double tLeaveVolume) {
-        if (iterObject->intersectedObject()->material()->hasEmission()) {
-            return iterObject->intersectedObject()->material()->getEmission()
-                            * transmittance
-                            * 1.0 / ( exp(-sigT * ( tLeaveVolume - tEnterVolume ) ) );
+    Vec3f shadeSurface_(const Ray& ray, int depth, double russiaRatio, ComputedTransmittance& computed2eyeTransmittance) {
+        auto& iterObject = computed2eyeTransmittance.iterObject;
+        double fromVolumeEntryToSurfaceT = computed2eyeTransmittance.iterObject.t() - fmax(computed2eyeTransmittance.tEnterVolume, 0);
+
+        if (iterObject.intersectedObject()->material()->hasEmission()) {
+            return iterObject.intersectedObject()->material()->getEmission()
+                            * computed2eyeTransmittance.transmittance
+                            * ( 1.0 / ( exp(-sigT * fromVolumeEntryToSurfaceT ) ) );
         }
 
         Vec3f surfaceColor;
 
         if (enableSampleLight) {
-            Object **light = new Object *();
-            Vec3f sampleLightPosition;
-            double sampleRatio;
-            scene_->sampleLight(light, sampleLightPosition, sampleRatio);
+            SampledLight sampledLightObj = sampleLight_(iterObject.hitPoint());
 
-            Vec3f lightNormal = (*light)->computeNormal(sampleLightPosition);
-            Vec3f light2hitPoint = (iterObject->hitPoint() - sampleLightPosition).normalized();
-            Ray ray2light(iterObject->hitPoint(), (sampleLightPosition - iterObject->hitPoint()).normalized());
+            if (sampledLightObj.canReachLight) {
+                ComputedTransmittance computed2lightTransmittance = computeTransmittance_(sampledLightObj.ray2light);
+                Vec3f intersectedObjectNormal = iterObject.intersectedObject()->computeNormal(iterObject.hitPoint());
 
-            auto intersectionWithLight = scene_->intersect(ray2light);
-
-            if ((intersectionWithLight.hitPoint() - sampleLightPosition).norm() < 0.1) {
-                Vec3f intersectedObjectNormal = iterObject->intersectedObject()->computeNormal(iterObject->hitPoint()).normalized();
-                double r = (sampleLightPosition - iterObject->hitPoint()).norm();
-                double r2 = std::pow(r, 2);
-                double lightTransmittance = 1.0;
-
-                auto intersectionWithLightVolume = scene_->intersectVolume(ray2light);
-                double tEnterLightVolume = std::numeric_limits<double>::max(), tOutLightVolume = tEnterLightVolume;
-
-                if (intersectionWithLightVolume.happened()) {
-                    tOutLightVolume = fmin(intersectionWithLight.t(), intersectionWithLightVolume.tMax());
-                    tEnterLightVolume = intersectionWithLightVolume.t();
-                    lightTransmittance = exp( -sigT * fmax(tOutLightVolume - tEnterLightVolume, 0) );
-                }
-
-                surfaceColor += (*light)->material()->getEmission(light2hitPoint, lightNormal)
-                                / r2
-                                * iterObject->intersectedObject()->material()->fr(-light2hitPoint, -ray.direction, intersectedObjectNormal)
-                                * std::fmax(cos(lightNormal, light2hitPoint), 0)
-                                * std::fmax(cos(light2hitPoint, -intersectedObjectNormal), 0)
-                                * lightTransmittance
-                                * (1.0 / sampleRatio)
-                                * transmittance
-                                * 1.0 / ( exp( -sigT * ( tLeaveVolume - tLeaveVolume ) ) );
+                surfaceColor += sampledLightObj.sampledEmission
+                                * iterObject.intersectedObject()->material()->fr(sampledLightObj.ray2light.direction, -ray.direction, intersectedObjectNormal)
+                                * std::fmax(cos(sampledLightObj.ray2light.direction, intersectedObjectNormal), 0)
+                                * computed2lightTransmittance.transmittance
+                                * (1.0 / sampledLightObj.sampleRatio)
+                                * computed2eyeTransmittance.transmittance
+                                * 1.0 / ( exp( -sigT * fromVolumeEntryToSurfaceT ) );
             }
         }
 
         if (util::getRandom01() < russiaRatio) {
-            Vec3f intersectedObjectNormal = iterObject->intersectedObject()
-                    ->computeNormal(iterObject->hitPoint()).normalized();
+            Vec3f intersectedObjectNormal = iterObject.intersectedObject()
+                    ->computeNormal(iterObject.hitPoint()).normalized();
 
-            std::pair<Vec3f, double> sampleIndirectDirectionPair = iterObject->intersectedObject()->material()->sampleOutDirection(
+            std::pair<Vec3f, double> sampleIndirectDirectionPair = iterObject.intersectedObject()->material()->sampleOutDirection(
                     -ray.direction,
                     intersectedObjectNormal
             );
@@ -291,18 +255,18 @@ private:
             double sampleIndirectDirectionRatio = sampleIndirectDirectionPair.second;
             double cosNormalOutRay = cos(intersectedObjectNormal, sampleIndirectDirection);
 
-            Ray nextRay(iterObject->hitPoint(), sampleIndirectDirection);
+            Ray nextRay(iterObject.hitPoint(), sampleIndirectDirection);
             auto nextIter = scene_->intersect(nextRay);
 
             if (!nextIter.happened() || !nextIter.intersectedObject()->material()->hasEmission()) {
-                Vec3f tracedColor = scene_->trace(Ray(iterObject->hitPoint(), sampleIndirectDirection), depth);
-                surfaceColor += iterObject->intersectedObject()->material()->fr(sampleIndirectDirection, -ray.direction, intersectedObjectNormal)
+                Vec3f tracedColor = scene_->trace(Ray(iterObject.hitPoint(), sampleIndirectDirection), depth);
+                surfaceColor += iterObject.intersectedObject()->material()->fr(sampleIndirectDirection, -ray.direction, intersectedObjectNormal)
                                 * cosNormalOutRay
                                 * tracedColor
-                                / sampleIndirectDirectionRatio
-                                * transmittance
-                                / exp( -sigT * ( tLeaveVolume - tLeaveVolume ) )
-                                / russiaRatio;
+                                * (1.0f / sampleIndirectDirectionRatio)
+                                * computed2eyeTransmittance.transmittance
+                                * (1.0f / exp( -sigT * fromVolumeEntryToSurfaceT ))
+                                * (1.0f / russiaRatio);
             }
         }
 
