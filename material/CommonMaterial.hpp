@@ -37,7 +37,7 @@ public:
 
     virtual bool hasEmission() const { return false; }
     virtual const Vec3f getEmission() const { return emission_; }
-    virtual const Vec3f getEmission(const Vec3f& point2lightVec, const Vec3f& normal) const { return emission_; }
+    virtual const Vec3f getEmission(const Vec3f& wi, const Vec3f& normal) const { return emission_; }
     virtual Vec3f fr(const Vec3f& wi, const Vec3f& wo, const Vec3f& normal) const {
         return property_->BRDF(kd_, ks_, emission_, wi, wo, normal);
     }

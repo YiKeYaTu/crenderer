@@ -13,7 +13,7 @@
 
 class Scene {
 private:
-    bool enableMultipleThread = true;
+    bool enableMultipleThread = false;
     std::vector<Object*> objects_;
     std::vector<Object*> lights_;
     std::vector<Object*> volumes_;
@@ -105,10 +105,7 @@ public:
     }
 
     Vec3f trace(const Ray& ray, int depth = 0) {
-        Intersection iterObject = intersect(ray);
-        Intersection iterVolume = intersectVolume(ray);
-
-        return shader_->shade(ray, depth, &iterObject, &iterVolume);
+        return shader_->shade(ray, depth);
     }
 
     void sampleLight(Object** light, Vec3f& samplePosition, double& sampleRatio) {

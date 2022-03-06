@@ -73,11 +73,11 @@ void renderCornellBox() {
 //    scene.addObject(&sphere);
 //    scene.addObject(spotlight);
 
-    PathTraceShader pathTraceShader(&scene);
-    scene.setShader(&pathTraceShader);
+//    PathTraceShader pathTraceShader(&scene);
+//    scene.setShader(&pathTraceShader);
 
     auto start = std::chrono::system_clock::now();
-    std::vector<Vec3f> frameBuffer = scene.render(2);
+    std::vector<Vec3f> frameBuffer = scene.render(32);
     auto stop = std::chrono::system_clock::now();
 
     util::saveFrameBufferAsPPM("cornellBox.ppm", frameBuffer, scene.width(), scene.height());
@@ -109,6 +109,7 @@ void renderCornellVolumeBox() {
     scene.addObject(&left);
     scene.addObject(&right);
     scene.addObject(&light);
+//    scene.addObject(&spotlight);
     scene.addObject(&floor);
     scene.addObject(&tallbox);
     scene.addObject(&shortbox);
@@ -121,7 +122,7 @@ void renderCornellVolumeBox() {
     scene.setShader(&volumeLightShader);
 
     auto start = std::chrono::system_clock::now();
-    std::vector<Vec3f> frameBuffer = scene.render(32);
+    std::vector<Vec3f> frameBuffer = scene.render(2);
     auto stop = std::chrono::system_clock::now();
 
     util::saveFrameBufferAsPPM("cornellVolumeBox.ppm", frameBuffer, scene.width(), scene.height());
@@ -132,6 +133,9 @@ void renderCornellVolumeBox() {
     std::cout << "          : " << std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() << " seconds\n";
 }
 
+int caonima() {
+
+}
 
 int main() {
 //    renderCornellBox();
