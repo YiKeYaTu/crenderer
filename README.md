@@ -6,4 +6,4 @@
 - Volume light scattering
 
 ## Example
-<img height="1080" src="./cmake-build-debug/cornellVolumeBox.ppm" width="1920"/>
+<img height="1080" src="https://raw.githubusercontent.com/YiKeYaTu/crenderer/main/examples/cornellVolumeBox.png" width="1920"/>
