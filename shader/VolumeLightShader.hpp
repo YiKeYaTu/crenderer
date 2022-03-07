@@ -77,7 +77,7 @@ private:
 
         Vec3f sampledLightNormal = (*light)->computeNormal(sampledLightPosition);
         // projection light area to the half sphere
-        Vec3f sampledEmission = (*light)->material()->getEmission(light2point, sampledLightNormal)
+        Vec3f sampledEmission = (*light)->material()->getEmission(point, sampledLightPosition, sampledLightNormal, *light)
                 * (1.0 / r2)
                 * std::fmax(cos(sampledLightNormal, light2point), 0);
 
@@ -188,6 +188,7 @@ private:
                                  * (1.0 / sampledLightObj.sampleRatio);
             }
         }
+//        if (false) {
         if (util::getRandom01() < russiaRatio) {
             std::pair<Vec3f, double> sampleIndirectDirectionPair = sampleInScatteringDirection();
             Ray particle2random(particlePosition, sampleIndirectDirectionPair.first);

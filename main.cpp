@@ -91,6 +91,7 @@ void renderCornellBox() {
 void renderCornellVolumeBox() {
     CommonLightMaterial lightMaterial(Vec3f(0.65f, 0.65f, 0.65f), Vec3f(), (Vec3f(0.747f+0.058f, 0.747f+0.258f, 0.747f)*8.0f + Vec3f(0.740f+0.287f,0.740f+0.160f,0.740f)*15.6f + Vec3f(0.737f+0.642f,0.737f+0.159f,0.737f)*18.4f));
 //    CommonLightMaterial lightMaterial(Vec3f(0.65f, 0.65f, 0.65f), Vec3f(), (Vec3f(0.747f+0.058f, 0.747f+0.258f, 0.747f)*8.0f + Vec3f(0.740f+0.287f,0.740f+0.160f,0.740f)*15.6f + Vec3f(0.737f+0.642f,0.737f+0.159f,0.737f)*18.4f));
+//    CommonLightMaterial lightMaterial(Vec3f(0.65f, 0.65f, 0.65f), Vec3f(), (Vec3f(0.747f+0.058f, 0.747f+0.258f, 0.747f)*8.0f + Vec3f(0.740f+0.287f,0.740f+0.160f,0.740f)*15.6f + Vec3f(0.737f+0.642f,0.737f+0.159f,0.737f)*18.4f) / 100);
 
     std::cout << "rendering volume...." << std::endl;
     MeshTriangle tallbox = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/tallbox.obj", whiteMaterial);
@@ -108,8 +109,8 @@ void renderCornellVolumeBox() {
     Scene scene(1920, 1080, Vec3f(278, 273, -700), Vec3f(), 45);
     scene.addObject(&left);
     scene.addObject(&right);
-    scene.addObject(&light);
-//    scene.addObject(&spotlight);
+//    scene.addObject(&light);
+    scene.addObject(&spotlight);
     scene.addObject(&floor);
     scene.addObject(&tallbox);
     scene.addObject(&shortbox);
@@ -141,31 +142,6 @@ int main() {
 //    renderCornellBox();
 //    renderBunny();
     renderCornellVolumeBox();
-
-//    auto p = util::ThreadPool(16, 4 );
-//    int ans = 0;
-//
-//    std::mutex m;
-//
-//    for (int i = 0; i < 10000000; ++i) {
-//        p.tryAppendTask([i, &ans, &m]{
-////            std::lock_guard<std::mutex> l(m);
-//            ans += i;
-//        });
-//    }
-//
-//    p.stop();
-//    p.allJoin();
-//    std::cout << ans << std::endl;
-//
-//    ans = 0;
-//    for (int i = 0; i < 10000000; ++i) {
-//        ans += i;
-//    }
-//
-//
-//    std::cout << ans;
-
 
 
     return 0;

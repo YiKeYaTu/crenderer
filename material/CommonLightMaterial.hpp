@@ -12,8 +12,8 @@ class CommonLightMaterial: public CommonMaterial {
 public:
     CommonLightMaterial(const Vec3f &kd, const Vec3f &ks, const Vec3f &e): CommonMaterial(kd, ks, e) {}
 
-    virtual const Vec3f getEmission(const Vec3f& point2lightVec, const Vec3f& normal) const {
-        if (cos(point2lightVec, normal) <= 0) {
+    virtual const Vec3f getEmission(const Vec3f& pointPos, const Vec3f& lightPos, const Vec3f& normal, const Object* light) const {
+        if (cos(pointPos - lightPos, normal) < 0) {
             return Vec3f();
         }
         return emission_;

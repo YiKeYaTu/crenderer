@@ -13,7 +13,7 @@
 
 class Scene {
 private:
-    bool enableMultipleThread = false;
+    bool enableMultipleThread = true;
     std::vector<Object*> objects_;
     std::vector<Object*> lights_;
     std::vector<Object*> volumes_;

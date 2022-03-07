@@ -19,18 +19,40 @@ public:
     const double theta;
     const Vec3f zeroEmission;
 
-    virtual const Vec3f getEmission(const Vec3f& light2point, const Vec3f& normal) const override {
-        double c = cos(light2point, normal);
+    virtual const Vec3f getEmission(const Vec3f& pointPos, const Vec3f& lightPos, const Vec3f& normal, const Object* light) const override {
+        double a = normal.x(), b = normal.y(), c = normal.z();
+        double x = pointPos.x(), y = pointPos.y(), z = pointPos.z();
+        double x0 = light->centroid().x(), y0 = light->centroid().y(), z0 = light->centroid().z();
 
-        if (c < std::cos(theta)) {
-            if (c < 0) {
-                return zeroEmission;
-            } else {
-                return emission_ * std::pow(c / std::cos(theta), 40);
-            }
+        double t = ( ( a*x0 + b*y0 + c*z0 ) - ( a*x + b*y + c*z )  )
+                / ( normal.norm() * normal.norm() );
+
+        double x1 = x + a*t, y1 = y + b*t , z1 = z + c*t;
+
+        auto bounds3 = light->bounds3();
+
+        // The projected point is on the surface
+        if (x1 >= bounds3.min().x() &&
+            y1 >= bounds3.min().y() &&
+            z1 >= bounds3.min().z() &&
+            x1 <= bounds3.max().x() &&
+            y1 <= bounds3.max().y() &&
+            z1 <= bounds3.max().z()
+        ) {
+            return emission_;
         }
 
-        return emission_;
+        x1 = util::clamp(bounds3.min().x(), bounds3.max().x(), x1);
+        y1 = util::clamp(bounds3.min().y(), bounds3.max().y(), y1);
+        z1 = util::clamp(bounds3.min().z(), bounds3.max().z(), z1);
+
+        Vec3f nearestPointOnSurface{ x1, y1, z1 };
+
+        if (cos(pointPos - nearestPointOnSurface, normal) >= cos(theta)) {
+            return emission_;
+        }
+
+        return emission_ * pow( fmax( cos(pointPos - nearestPointOnSurface, normal), 0 ), 100 );
     }
 
 };
