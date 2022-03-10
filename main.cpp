@@ -6,7 +6,6 @@
 #include "object/Sphere.hpp"
 #include "acceleration/BVH.hpp"
 #include "shader/VolumeLightShader.hpp"
-#include "sample.hpp"
 
 #include "material/CommonMaterial.hpp"
 #include "material/CommonLightMaterial.hpp"

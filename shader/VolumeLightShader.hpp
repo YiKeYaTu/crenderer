@@ -9,7 +9,6 @@
 #include "../utils/util.hpp"
 #include "../Scene.hpp"
 #include "../object/MeshTriangle.hpp"
-#include "../sample.hpp"
 #include "PathTraceShader.hpp"
 
 class VolumeLightShader: public Shader {

@@ -1,3 +1,4 @@
 camke-build-debug
 .vs
+.DS_Store
 out
