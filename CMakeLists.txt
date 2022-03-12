@@ -3,6 +3,11 @@ project(crenderer)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(crenderer main.cpp)
-target_link_libraries( crenderer ${OPENCL_LIBRARIES} )
+find_package( OpenCL REQUIRED )
+
+add_executable( crenderer main.cpp gpu/opencl/kernels/TestStruct.hpp)
+add_executable( gpuTest gpu/test.cpp )
+
+target_link_libraries( crenderer OpenCL::OpenCL )
+target_link_libraries( gpuTest OpenCL::OpenCL )
 

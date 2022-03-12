@@ -248,3 +248,24 @@ Parsed CXX implicit link information from above output:
   implicit fwks: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk/System/Library/Frameworks]
 
 
+Determining if the CL_VERSION_1_2 exist passed with the following output:
+Change Dir: /Users/liangchen/CLionProjects/crenderer/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/Applications/CLion.app/Contents/bin/ninja/mac/ninja cmTC_d9419 && [1/2] Building C object CMakeFiles/cmTC_d9419.dir/CheckSymbolExists.c.o
+[2/2] Linking C executable cmTC_d9419
+
+
+File /Users/liangchen/CLionProjects/crenderer/cmake-build-debug/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include </Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk/System/Library/Frameworks/OpenCL.framework/Headers/cl.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef CL_VERSION_1_2
+  return ((int*)(&CL_VERSION_1_2))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}

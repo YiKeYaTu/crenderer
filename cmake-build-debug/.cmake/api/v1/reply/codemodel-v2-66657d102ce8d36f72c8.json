@@ -15,7 +15,8 @@
 					"source" : ".",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -30,7 +31,8 @@
 					"name" : "crenderer",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -39,8 +41,15 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "crenderer::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-crenderer-Debug-55f210ceb80c28605470.json",
+					"jsonFile" : "target-crenderer-Debug-dbec5e5229111e5712d6.json",
 					"name" : "crenderer",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "gpuTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-gpuTest-Debug-117ef82c6d25f1cdd199.json",
+					"name" : "gpuTest",
 					"projectIndex" : 0
 				}
 			]

@@ -12,15 +12,31 @@
 #include <queue>
 #include <thread>
 #include <map>
+#include <sstream>
+#include "../Vector.hpp"
 
 namespace util {
 constexpr double MY_PI = 3.14159265358979323846;
+
+std::string readFileString(const std::string& path) {
+    std::ifstream file(path, std::ios::in);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open file for reading: " + path);
+    }
+
+    std::ostringstream oss;
+    oss << file.rdbuf();
+
+    return oss.str();
+}
+
 double getRandom01() {
     static std::random_device dev;
     static std::mt19937 rng(dev());
     static std::uniform_real_distribution<float> dist(0.f, 1.f);
     return dist(rng);
 }
+
 std::vector<std::string> split(std::string& s, const std::string& separator) {
     std::vector<std::string> tokens;
 
