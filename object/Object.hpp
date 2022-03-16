@@ -11,6 +11,7 @@
 #include "../acceleration/Bounds3.hpp"
 #include "../Ray.hpp"
 #include "../material/CommonMaterial.hpp"
+#include "ObjectTypes.hpp"
 
 extern class Intersection;
 
@@ -19,6 +20,8 @@ public:
     virtual Intersection intersect(const Ray& ray) const = 0;
 
     Object() {}
+
+    int type() { return type_; }
 
     std::pair<Vec3f, double> sampleDirection() const {
         double ratio = 1.0f / 2.0f / util::MY_PI;
@@ -43,13 +46,15 @@ public:
 
     const Bounds3& bounds3() const { return bounds3_; };
     const Vec3f& centroid() const { return centroid_; }
-    const Vec3f& normal(const Vec3f& p) const { return computeNormal(p); }
+    const Vec3f normal() const { return normal_; }
+    const Vec3f normal(const Vec3f& p) const { return computeNormal(p); }
     const CommonMaterial* material() const { return material_; }
 
 protected:
     Bounds3 bounds3_;
     Vec3f centroid_;
     Vec3f normal_;
+    int type_;
     mutable const CommonMaterial* material_;
 };
 

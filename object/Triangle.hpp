@@ -9,8 +9,10 @@
 #include "Object.hpp"
 #include "../acceleration/Bounds3.hpp"
 #include "../material/CommonMaterial.hpp"
+#include "../gpu/openCL/include/C_Triangle.h"
 
 class Triangle: public Object {
+    friend C_Triangle triangle2cTriangle(Triangle* triangle);
     friend std::ostream &operator<<(std::ostream &os, const Triangle &t) {
         os << "v0: " << t.v0_ << std::endl;
         os << "v1: " << t.v1_ << std::endl;
@@ -27,6 +29,7 @@ public:
             centroid_ = (v0 + v1 + v2) / 3;
             bounds3_ = Bounds3::computeBounds3({ v0, v1, v2 });
             normal_ = crossProduct(e0_, e1_);
+            type_ = TRIANGLE;
         };
 
     virtual const Vec3f computeNormal(const Vec3f& p) const override {

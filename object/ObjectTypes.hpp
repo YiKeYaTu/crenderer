@@ -1,0 +1,12 @@
+//
+// Created by lc on 2022/3/15.
+//
+
+#ifndef CRENDERER_OBJECTTYPES_HPP
+#define CRENDERER_OBJECTTYPES_HPP
+
+#define TRIANGLE 1
+#define SPHERE 2
+#define MESH_TRIANGLE 3
+
+#endif //CRENDERER_OBJECTTYPES_HPP

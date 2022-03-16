@@ -40,6 +40,7 @@ private:
         bvh->left_ = buildBVH_(objects, (axis + 1) % 3, lo, mid);
         bvh->right_ = buildBVH_(objects, (axis + 1) % 3, mid, hi);
         bvh->bounds3_ = Bounds3::computeBounds3(bounds3s);
+        bvh->geometry_ = nullptr;
 
         return bvh;
     }

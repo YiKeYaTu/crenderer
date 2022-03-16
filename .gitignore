@@ -1,4 +1,5 @@
-camke-build-debug
+cmake-build-debug/
+
 .vs
 .DS_Store
 out

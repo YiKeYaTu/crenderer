@@ -3,66 +3,64 @@
 //
 
 #include <iostream>
-#include "./opencl/OpenCLProgramContext.hpp"
-#include "./opencl/kernels/TestStruct.hpp"
+#include "openCL/OpenCLProgramContext.hpp"
+#include "openCL/OpenCLKernel.hpp"
+#include "openCL/include/C_BVH.h"
+#include "openCL/include/C_Bounds3.h"
+#include "openCL/include/C_Ray.h"
+#include "openCL/include/C_Object.h"
+#include "openCL/include/C_Intersection.h"
+#include "openCL/translation/bvh2cBvh.hpp"
+#include "openCL/translation/ray2cRay.hpp"
+
+#include "../object/ObjectTypes.hpp"
+#include "../DefaultScene.hpp"
+#include "../Ray.hpp"
 
 int main() {
+    std::shared_ptr<Scene> cornellVolumeBoxScene = DefaultScene::getCornellVolumeBox();
+    auto sceneBvh = cornellVolumeBoxScene->bvh();
+
+    auto [ cBvhs, objects ] = bvh2cBvh(sceneBvh.get());
+    int numBvhNodes = cBvhs.size();
+    int numObjects = objects.size();
+
+    Ray ray({ 50, 50, -800 }, { 0, 0, 1 });
+
+    C_Ray cRay = ray2cRay(ray);
+
+    auto interCPU = cornellVolumeBoxScene->intersect(ray);
+
+    std::cout << "min x: " << cBvhs[0].bounds3.min.x
+              << "min y: " << cBvhs[0].bounds3.min.y
+              << "min z: " << cBvhs[0].bounds3.min.z << std::endl;
+    std::cout << "max x: " << cBvhs[0].bounds3.max.x
+              << "max y: " << cBvhs[0].bounds3.max.y
+              << "max z: " << cBvhs[0].bounds3.max.z << std::endl;
+
     cl_uint numPlatforms = OpenCLProgramContext::getNumPlatforms();
     std::vector<cl_platform_id> platformIDs = OpenCLProgramContext::getPlatformIDs(numPlatforms);
     OpenCLProgramContext openClProgramContext = OpenCLProgramContext::createGPUContext(platformIDs[0]);
 
     openClProgramContext.useDevice({0});
-    openClProgramContext.useKernel("/Users/liangchen/CLionProjects/crenderer/gpu/opencl/kernels/helloStruct.cl.c",
-                                   "hello_struct");
+    openClProgramContext.useProgram(
+            "/Users/liangchen/CLionProjects/crenderer/gpu/openCL/kernel/trace.cl",
+            "-I /Users/liangchen/CLionProjects/crenderer/gpu/openCL/include -D __OPENCL_C_VERSION__=\"120\""
+    );
 
-    struct TestStruct input[2];
-    input[0].num = 10;
-    input[1].num = 100;
+    OpenCLKernel kernel1 = openClProgramContext.createKernel("castRay");
+    kernel1.setWorkSize({ 1 }, { 1 });
 
-    struct TestStruct output[2];
+    C_Intersection interGPU;
 
-    openClProgramContext.setKernelArguments(0, input, 2);
-    openClProgramContext.setReturnValues(1, output, 2);
+    kernel1.setInputArguments(0, &cRay, 1);
+    kernel1.setInputArguments(1, &cBvhs[0], numBvhNodes);
+    kernel1.setInputArguments(2, &numBvhNodes, 1);
+    kernel1.setInputArguments(3, &objects[0], numObjects);
+    kernel1.setInputArguments(4, &numObjects, numObjects);
+    kernel1.setOutputArguments(5, &interGPU, 1);
 
-    size_t globalWorkSize[1] = { 2 };
-    size_t localWorkSize[1]  = { 1 };
-
-    openClProgramContext.setWorkSize(globalWorkSize, localWorkSize);
-    openClProgramContext.execute();
-
-    for (int i = 0; i < 2; ++i) {
-        std::cout << output[i].num << std::endl;
-    }
-
-
-//    openClProgramContext.useKernel("/Users/liangchen/CLionProjects/crenderer/gpu/opencl/kernels/helloWorld.cl.c", "hello_kernel");
-
-//    int a[2][2] = {
-//        { 1, 3 },
-//        { 1, 3 }
-//    };
-//    int b[2][2] = {
-//        { 2, 4 },
-//        { 3, 3 }
-//    };
-//    int c[2][2];
-//
-//    openClProgramContext.setKernelArguments(0, a, 4);
-//    openClProgramContext.setKernelArguments(1, b, 4);
-//    openClProgramContext.setReturnValues(2, c, 4);
-//
-//    size_t globalWorkSize[1] = { 4 };
-//    size_t localWorkSize[1]  = { 1 };
-
-//    openClProgramContext.setWorkSize(globalWorkSize, localWorkSize);
-//    openClProgramContext.execute();
-//
-//    for (int i = 0; i < 2; ++i) {
-//        for (int j = 0; j < 2; ++j) {
-//            std::cout << c[i][j] << std::endl;
-//        }
-//    }
-
+    openClProgramContext.execute(kernel1);
 
     return 0;
 }

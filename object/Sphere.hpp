@@ -13,6 +13,7 @@ public:
         centroid_ = center;
         material_ = material;
         bounds3_ = Bounds3(Vec3f(c.x() - r, c.y() - r, c.z() - r), Vec3f(c.x() + r, c.y() + r, c.z() + r));
+        type_ = SPHERE;
     }
 
     virtual Intersection intersect(const Ray& ray) const {

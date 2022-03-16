@@ -33,6 +33,7 @@ public:
         }
         centroid_ /= triangles_.size();
         bounds3_ = Bounds3::computeBounds3(vertexes);
+        type_ = MESH_TRIANGLE;
     }
     MeshTriangle(const std::vector<Vec3f> &vertexes, const std::vector<std::size_t> indexes)
     : MeshTriangle(vertexes, indexes, nullptr) {}
@@ -43,6 +44,8 @@ public:
     virtual const Vec3f computeNormal(const Vec3f& p) const override {
         return triangles_[0]->computeNormal(p);
     }
+
+    std::shared_ptr<BVH> bvh() { return bvh_; }
 
 private:
     std::vector<Object*> triangles_;

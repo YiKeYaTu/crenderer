@@ -42,18 +42,20 @@ public:
     void addObject(Object* object) { objects_.push_back(object); }
     void addVolume(Object* object) { volumes_.push_back(object); }
     void setShader(Shader* shader) { shader_ = shader; }
+    const std::shared_ptr<BVH> bvh() const { return bvh_; }
+    void buildBvh() {
+        bvh_ = BVH::buildBVH(objects_);
+        volumeBvh_ = BVH::buildBVH(volumes_);
+    }
 
     std::vector<Vec3f> render(std::size_t spp = 32, std::size_t numThread = 1) {
         assert(spp > 0);
 
+        buildBvh();
+
         int m = 0;
         double aspectRatio = static_cast<double>(width_) / height_;
         double scale = std::tan((fov_ / 2) / 180 * util::MY_PI);
-
-        if (bvh_ == nullptr) {
-            bvh_ = BVH::buildBVH(objects_);
-            volumeBvh_ = BVH::buildBVH(volumes_);
-        }
 
         util::ThreadPool threadPool_ = util::ThreadPool(16, 16);
         std::mutex mutexFrameBuffer;

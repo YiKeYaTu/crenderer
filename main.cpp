@@ -105,7 +105,7 @@ void renderCornellVolumeBox() {
 
 //    Scene scene(100, 100, Vec3f(278, 273, -800), Vec3f(), 45);
 
-    Scene scene(1920, 1080, Vec3f(278, 273, -700), Vec3f(), 45);
+    Scene scene(100, 100, Vec3f(278, 273, -700), Vec3f(), 45);
     scene.addObject(&left);
     scene.addObject(&right);
 //    scene.addObject(&light);
