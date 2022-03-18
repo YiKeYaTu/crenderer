@@ -39,10 +39,17 @@ public:
     }
     const unsigned int width() const { return width_; }
     const unsigned int height() const { return height_; }
-    void addObject(Object* object) { objects_.push_back(object); }
+    const double fov() const { return fov_; }
+    void addObject(Object* object) {
+        objects_.push_back(object);
+        if (object->material()->hasEmission()) {
+            lights_.push_back(object);
+        }
+    }
     void addVolume(Object* object) { volumes_.push_back(object); }
     void setShader(Shader* shader) { shader_ = shader; }
     const std::shared_ptr<BVH> bvh() const { return bvh_; }
+    const std::shared_ptr<BVH> volumeBvh() const { return volumeBvh_; }
     void buildBvh() {
         bvh_ = BVH::buildBVH(objects_);
         volumeBvh_ = BVH::buildBVH(volumes_);
@@ -115,15 +122,12 @@ public:
         static double area = 0;
 
         if (area == 0) {
-            for (const auto object : objects_) {
-                if (object->material()->hasEmission()) {
-                    lights_.push_back(object);
-                    const auto& bounds3 = object->bounds3();
-                    double length = bounds3.max().x() - bounds3.min().x();
-                    double width = bounds3.max().z() - bounds3.min().z();
+            for (const auto object : lights_) {
+                const auto& bounds3 = object->bounds3();
+                double length = bounds3.max().x() - bounds3.min().x();
+                double width = bounds3.max().z() - bounds3.min().z();
 
-                    area += width * length;
-                }
+                area += width * length;
             }
         }
 
@@ -152,6 +156,11 @@ public:
             }
         }
     }
+
+    Vec3f& cameraPos() { return cameraPos_; }
+    const std::vector<Object *>& objects() const { return objects_; }
+    const std::vector<Object *>& lights() const { return lights_; }
+    const std::vector<Object *>& volumes() const { return volumes_; }
 };
 
 #endif //CRENDERER_SCENE_HPP

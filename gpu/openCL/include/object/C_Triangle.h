@@ -5,7 +5,7 @@
 #ifndef OPENCL_C_TRIANGLE_H
 #define OPENCL_C_TRIANGLE_H
 
-#include "OpenCLGlobal.h"
+#include "../OpenCLGlobal.h"
 
 typedef struct {
     cl_float3 v0, v1, v2;

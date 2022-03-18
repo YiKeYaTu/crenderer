@@ -9,7 +9,7 @@
 #include "Object.hpp"
 #include "../acceleration/Bounds3.hpp"
 #include "../material/CommonMaterial.hpp"
-#include "../gpu/openCL/include/C_Triangle.h"
+#include "../gpu/openCL/include/object/C_Triangle.h"
 
 class Triangle: public Object {
     friend C_Triangle triangle2cTriangle(Triangle* triangle);

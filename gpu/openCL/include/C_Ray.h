@@ -8,10 +8,10 @@
 #include "OpenCLGlobal.h"
 
 typedef struct {
-    const cl_float scale;
-    const cl_float3 origin;
-    const cl_float3 direction;
-    const cl_float3 recDirection;
+    cl_float scale;
+    cl_float3 origin;
+    cl_float3 direction;
+    cl_float3 recDirection;
 } C_Ray;
 
 #endif //OPENCL_C_RAY_H

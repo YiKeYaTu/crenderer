@@ -34,6 +34,7 @@ public:
         centroid_ /= triangles_.size();
         bounds3_ = Bounds3::computeBounds3(vertexes);
         type_ = MESH_TRIANGLE;
+        normal_ = triangles_[0]->normal();
     }
     MeshTriangle(const std::vector<Vec3f> &vertexes, const std::vector<std::size_t> indexes)
     : MeshTriangle(vertexes, indexes, nullptr) {}

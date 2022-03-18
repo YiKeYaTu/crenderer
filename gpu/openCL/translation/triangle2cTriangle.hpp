@@ -5,7 +5,7 @@
 #ifndef CRENDERER_TRIANGLE2CTRIANGLE_HPP
 #define CRENDERER_TRIANGLE2CTRIANGLE_HPP
 
-#include "../include/C_Triangle.h"
+#include "../include/object/C_Triangle.h"
 #include "../../../object/Triangle.hpp"
 #include "vec32float3.hpp"
 

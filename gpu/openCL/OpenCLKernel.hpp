@@ -43,6 +43,22 @@ public:
         clSetKernelArg(kernel_, pos, sizeof(cl_mem), &memInputObjects_.back());
     }
     template<typename T>
+    void setInterArguments(std::size_t pos, T* data, std::size_t dataSize) {
+        memInputObjects_.push_back(clCreateBuffer(
+                context_,
+                CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
+                sizeof(T) * dataSize,
+                data,
+                NULL
+        ));
+
+        if (memInputObjects_.back() == NULL) {
+            throw std::runtime_error("Error creating memory objects.");
+        }
+
+        clSetKernelArg(kernel_, pos, sizeof(cl_mem), &memInputObjects_.back());
+    }
+    template<typename T>
     void setOutputArguments(std::size_t pos, T* data, std::size_t dataSize) {
         std::size_t totalSize = sizeof(T) * dataSize;
         memOutputObjects_.emplace_back(
@@ -79,8 +95,8 @@ private:
     std::vector<cl_mem> memInputObjects_;
     std::vector<MemObject> memOutputObjects_;
 
-    std::vector<size_t> globalWorkSize_;
-    std::vector<size_t> localWorkSize_;
+    std::vector<size_t> globalWorkSize_ = { 1 };
+    std::vector<size_t> localWorkSize_ = { 1 };
 };
 
 #endif //CRENDERER_OPENCLKERNEL_HPP

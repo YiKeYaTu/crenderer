@@ -1,203 +1,95 @@
-#include "./C_Bounds3.h"
-#include "./C_BVH.h"
-#include "./C_Intersection.h"
-#include "./C_Object.h"
-#include "./C_Ray.h"
+#ifndef OPENCL_TRACE_CL
+#define OPENCL_TRACE_CL
 
-C_Intersection intersect(global C_Ray* ray, global C_Object* objects, int objectIndex);
-C_Intersection intersectBounds3(global C_Ray* ray, global C_Bounds3* bounds3);
-C_Intersection intersectTriangle(global C_Ray* ray, global C_Triangle* triangle, int objectIndex);
+#include "include/C_Bounds3.h"
+#include "include/C_BVH.h"
+#include "include/C_Intersection.h"
+#include "include/object/C_Object.h"
+#include "include/C_Ray.h"
+#include "kernel/intersect.cl"
+#include "kernel/random.cl"
+#include "kernel/shade.cl"
 
-global C_BVH* getParent(global C_BVH* bvhNodes, global C_BVH* bvhNode) {
-    if (bvhNode->parentIndex == -1) {
-        return 0;
-    }
-    return &bvhNodes[bvhNode->parentIndex];
+kernel void generateMultipleRays(
+    global C_Ray* emptyRays,
+    global float3* origin,
+    global size_t* width,
+    global size_t* height,
+    global float* aspectRatio,
+    global float* scale
+){
+    size_t gid = get_global_id(0);
+
+    size_t j = gid / *width;
+    size_t i = gid % *width;
+    
+    float x = (2.0f * (i + 0.5f) / (float)(*width) - 1.0f) * (*aspectRatio) * (*scale);
+    float y = (1.0f - 2.0f * (j + 0.5f) / (float)(*height)) * (*scale);
+    
+    
+    float3 dir = (float3) (-x, y, 1);
+    float3 localOrigin = *origin;
+    
+    C_Ray ray = initCray(&localOrigin, &dir);
+    
+    *(emptyRays + gid) = ray;
 }
 
-global C_BVH* getLeftChild(global C_BVH* bvhNodes, global C_BVH* bvhNode) {
-    if (bvhNode->leftChildIndex == -1) {
-        return 0;
-    }
-    return &bvhNodes[bvhNode->leftChildIndex];
-}
-
-global C_BVH* getRightChild(global C_BVH* bvhNodes, global C_BVH* bvhNode) {
-    if (bvhNode->rightChildIndex == -1) {
-        return 0;
-    }
-    return &bvhNodes[bvhNode->rightChildIndex];
-}
-
-C_Intersection intersectBVH(
+kernel void trace(
+//    global uint* offset,
     global C_Ray* ray,
+                  
     global C_BVH* bvhNodes,
-    global int* numBvhNodes,
+    global C_BVH* volumeBvhNodes,
+                  
     global C_Object* objects,
-    global int* numObjects
+    global C_Object* volumeObjects,
+    global C_Object* lightObjects,
+                  
+    global uint* numObjects,
+    global uint* numVolumeObjects,
+    global uint* numLightObjects,
+                  
+    global float3* frameBuffer
 ) {
-    C_Intersection nearestIntersection = getEmptyIntersection();
+    size_t globalGid = get_global_id(0);
+    size_t localGid = get_local_id(0);
+    size_t globalSize = get_global_size(0);
+    size_t localSize = get_local_size(0);
     
-    if (*numBvhNodes <= 0) {
-        return nearestIntersection;
-    }
+//    size_t idx = (globalGid + *offset) / localSize;
+//    size_t rayIdx = (globalGid + *offset) / localSize;
+    size_t idx = globalGid / localSize;
     
-    const int fromParent = 1, fromChild = 2;
-    int status = fromParent;
+    local float3 pixelColors[HOST_SPP];
     
-    global C_BVH* current = &bvhNodes[0];
-    global C_BVH* parent;
-    global C_BVH* next;
-    
-    while (true) {
-        parent = getParent(bvhNodes, current);
-        next = 0;
-        
-        switch (status) {
-            case fromParent: {
-                if (current->leftChildIndex < 0 && current->rightChildIndex < 0) {
-                    C_Intersection currentIntersection = intersect(ray, objects, current->objectIndex);
-                    
-                    if (currentIntersection.happened && currentIntersection.tMin < nearestIntersection.tMin) {
-                        nearestIntersection = currentIntersection;
-                    }
-                    
-                    next = current;
-                    status = fromChild;
-                    break;
-                }
-                
-                C_Intersection intersection = intersectBounds3(ray, &current->bounds3);
+    pixelColors[localGid] = shade(
+        &ray[idx],
 
-                if (!intersection.happened) {
-                    next = current;
-                    status = fromChild;
-                    break;
-                }
-                
-                next = getLeftChild(bvhNodes, current);
-                status = fromParent;
+        bvhNodes,
+        volumeBvhNodes,
 
-                if (!next) {
-                    next = getRightChild(bvhNodes, current);
+        objects,
+        volumeObjects,
+        lightObjects,
 
-                    if (!next) {
-                        next = current;
-                        status = fromChild;
-                    }
-                }
-                break;
-            }
-            case fromChild: {
-                if (!parent) {
-                    return nearestIntersection;
-                }
-                
-                if (current == getLeftChild(bvhNodes, parent)) {
-                    status = fromParent;
-                    next = getRightChild(bvhNodes, parent);
-                }
-                
-                if (!next) {
-                    status = fromChild;
-                    next = parent;
-                }
-                
-                break;
-            }
+        numObjects,
+        numVolumeObjects,
+        numLightObjects,
+
+        globalGid);
+//    pixelColors[localGid] = (float3) (.5f, .5f, .5f);
+    
+    barrier(CLK_LOCAL_MEM_FENCE);
+    
+    if (localGid == 0) {
+        float3 pixelColor = (float3) (0.f, 0.f, 0.f);
+        for (int i = 0; i < HOST_SPP; i ++) {
+            pixelColor += pixelColors[i];
         }
-        
-        current = next;
+        pixelColor /= HOST_SPP;
+        frameBuffer[idx] = pixelColor;
     }
 }
 
-C_Intersection intersectTriangle(global C_Ray* ray, global C_Triangle* triangle, int objectIndex) {
-    float3 o = ray->origin;
-    float3 d = ray->direction;
-    float3 v13 = triangle->v0 - triangle->v2;
-    float3 v23 = triangle->v1 - triangle->v2;
-    
-    float c11 = -d.x, c12 = v13.x, c13 = v23.x;
-    float c21 = -d.y, c22 = v13.y, c23 = v23.y;
-    float c31 = -d.z, c32 = v13.z, c33 = v23.z;
-
-    float D = c11*c22*c33 + c12*c23*c31 + c13*c21*c32 - c13*c22*c31 - c11*c23*c32 - c12*c21*c33;
-
-    float r1 = o.x - triangle->v2.x;
-    float r2 = o.y - triangle->v2.y;
-    float r3 = o.z - triangle->v2.z;
-
-    float D1 = r1*c22*c33 + c12*c23*r3 + c13*r2*c32 - c13*c22*r3 - r1*c23*c32 - c12*r2*c33;
-    float D2 = c11*r2*c33 + r1*c23*c31 + c13*c21*r3 - c13*r2*c31 - c11*c23*r3 - r1*c21*c33;
-    float D3 = c11*c22*r3 + c12*r2*c31 + r1*c21*c32 - r1*c22*c31 - c11*r2*c32 - c12*c21*r3;
-
-    float t = D1 / D;
-    float a = D2 / D, b = D3 / D, c = 1.0f - a - b;
-
-    float eps = 1e-15;
-
-    if (t < 0 || a + eps < 0 || b + eps < 0 || c + eps < 0) {
-        return getEmptyIntersection();
-    }
-
-    float3 hitPoint = triangle->v0 * a + triangle->v1 * b + triangle->v2 * c;
-    float distance = length(ray->direction * t);
-    
-    return initIntersection(
-        t,
-        t,
-        distance,
-        &hitPoint,
-        objectIndex
-    );
-}
-
-C_Intersection intersectBounds3(global C_Ray* ray, global C_Bounds3* bounds3) {
-    float tMin = FLT_MIN;
-    float tMax = FLT_MAX;
-    
-    float t1, t2;
-
-    for (int i = 0; i < 3; ++i) {
-        t1 = (bounds3->min[i] - ray->origin[i]) * ray->recDirection[i];
-        t2 = (bounds3->max[i] - ray->origin[i]) * ray->recDirection[i];
-
-        if (t1 < 0 && t2 < 0) { return getEmptyIntersection(); }
-
-        tMin = max(min(t1, t2), tMin);
-        tMax = min(max(t1, t2), tMax);
-    }
-
-    if (tMin <= tMax) {
-        C_Intersection intersection = {
-            .happened = true,
-            .tMin = tMin,
-            .tMax = tMax
-        };
-        return intersection;
-    }
-
-    return getEmptyIntersection();
-}
-
-C_Intersection intersect(global C_Ray* ray, global C_Object* objects, int objectIndex) {
-    switch ((objects + objectIndex)->subType) {
-        case TRIANGLE:
-            return intersectTriangle(ray, &((objects + objectIndex)->triangle), objectIndex);
-            break;
-        case SPHERE:
-            break;
-    }
-}
-
-kernel void castRay(
-    global C_Ray* ray,
-    global C_BVH* bvhNodes,
-    global int* numBvhNodes,
-    global C_Object* objects,
-    global int* numObjects,
-    global C_Intersection* outputIntersection
-) {
-    int gid = get_global_id(0);
-    *outputIntersection = intersectBVH(ray, bvhNodes, numBvhNodes, objects, numObjects);
-}
+#endif

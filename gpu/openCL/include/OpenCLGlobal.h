@@ -13,10 +13,6 @@ typedef float3 cl_float3;
 typedef bool cl_bool;
 typedef short cl_short;
 
-#define TRIANGLE 1
-#define SPHERE 2
-#define MESH_TRIANGLE 3
-
 #else
 
 #include <OpenCL/cl.h>
@@ -24,5 +20,10 @@ typedef short cl_short;
 #include "../../../object/ObjectTypes.hpp"
 
 #endif
+
+#define TRIANGLE 1
+#define SPHERE 2
+#define MESH_TRIANGLE 3
+#define M_PI 3.14159274101257f
 
 #endif //CRENDERER_OPENCLGLOBAL_H

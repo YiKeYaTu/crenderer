@@ -86,7 +86,29 @@ public:
         return OpenCLKernel(program_, context_, kernelName);
     }
 
+    size_t* getMaxWorkItemSizes() {
+        size_t param_value_size_ret;
+        clGetDeviceInfo(usedDeviceIDs_[0], CL_DEVICE_MAX_WORK_ITEM_SIZES, 0, NULL, &param_value_size_ret);
+        void* buffer = malloc(param_value_size_ret * sizeof(char));
+        clGetDeviceInfo(usedDeviceIDs_[0], CL_DEVICE_MAX_WORK_ITEM_SIZES, param_value_size_ret, buffer, NULL);
+
+        return static_cast<size_t*>(buffer);
+    }
+
+    cl_ulong getGlobalMemSize() {
+        size_t param_value_size_ret;
+        clGetDeviceInfo(usedDeviceIDs_[0], CL_DEVICE_GLOBAL_MEM_SIZE, 0, NULL, &param_value_size_ret);
+        void* buffer = malloc(param_value_size_ret * sizeof(char));
+        clGetDeviceInfo(usedDeviceIDs_[0], CL_DEVICE_GLOBAL_MEM_SIZE, param_value_size_ret, buffer, NULL);
+        cl_ulong ret = *(static_cast<cl_ulong*>(buffer));
+
+        free(buffer);
+
+        return ret;
+    }
+
     void execute(OpenCLKernel& openClKernel) {
+        assert(openClKernel.globalWorkSize_.size() > 0 && openClKernel.localWorkSize_.size() > 0);
         processErrors_(clEnqueueNDRangeKernel(
             commandQueue_,
             openClKernel.kernel_,
@@ -112,6 +134,7 @@ public:
                 NULL)
             );
         }
+
     }
 
 private:

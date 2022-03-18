@@ -18,7 +18,8 @@
 #include "vec32float3.hpp"
 #include "triangle2cTriangle.hpp"
 #include "sphere2cSphere.hpp"
-
+#include "material2cMaterial.hpp"
+#include "object2cObject.hpp"
 
 void bvh2cBvh_(std::vector<C_BVH>& cBvhs, std::vector<C_Object>& objects, BVH* bvh, int parentIndex, bool isLeftChild) {
     if (!bvh) {
@@ -51,24 +52,25 @@ void bvh2cBvh_(std::vector<C_BVH>& cBvhs, std::vector<C_Object>& objects, BVH* b
     }
 
     if (!bvh->left() && !bvh->right()) {
-        C_Object object = {
-                .bounds3 = bounds32cBounds3(bvh->geometry()->bounds3()),
-                .centroid = vec32float3(bvh->geometry()->centroid()),
-                .normal = vec32float3(bvh->geometry()->normal()),
-                .subType = bvh->geometry()->type()
-        };
-
-        switch (object.subType) {
-            case TRIANGLE:
-                object.triangle = triangle2cTriangle(static_cast<Triangle*>(bvh->geometry()));
-                break;
-            case SPHERE:
-                object.sphere = sphere2cSphere(static_cast<Sphere*>(bvh->geometry()));
-                break;
-        }
+//        C_Object object = {
+//                .bounds3 = bounds32cBounds3(bvh->geometry()->bounds3()),
+//                .centroid = vec32float3(bvh->geometry()->centroid()),
+//                .normal = vec32float3(bvh->geometry()->normal()),
+//                .subType = bvh->geometry()->type(),
+//                .material = material2cMaterial(bvh->geometry()->material())
+//        };
+//
+//        switch (object.subType) {
+//            case TRIANGLE:
+//                object.triangle = triangle2cTriangle(static_cast<Triangle*>(bvh->geometry()));
+//                break;
+//            case SPHERE:
+//                object.sphere = sphere2cSphere(static_cast<Sphere*>(bvh->geometry()));
+//                break;
+//        }
 
         cBvhs[currentBvhIndex].objectIndex = objects.size();
-        objects.push_back(object);
+        objects.push_back(object2cObject(bvh->geometry()));
     } else {
         bvh2cBvh_(cBvhs, objects, bvh->left().get(), currentBvhIndex, true);
         bvh2cBvh_(cBvhs, objects, bvh->right().get(), currentBvhIndex, false);

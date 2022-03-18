@@ -5,13 +5,14 @@
 #ifndef CRENDERER_C_SPHERE_H
 #define CRENDERER_C_SPHERE_H
 
-#include "OpenCLGlobal.h"
+#include "../OpenCLGlobal.h"
+#include "../C_Bounds3.h"
 
 typedef struct {
     cl_float3 center;
     cl_float radius;
     cl_float3 centroid;
-    cl_float3 bounds3;
+    C_Bounds3 bounds3;
 } C_Sphere;
 
 #endif //CRENDERER_C_SPHERE_H

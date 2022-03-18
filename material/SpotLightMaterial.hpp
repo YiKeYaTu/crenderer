@@ -13,8 +13,10 @@ class SpotlightMaterial: public CommonLightMaterial {
 public:
     static double defaultTheta;
 
-    SpotlightMaterial() = default;
-    SpotlightMaterial(const Vec3f &kd, const Vec3f &ks, const Vec3f &e, double theta = defaultTheta): CommonLightMaterial(kd, ks, e), theta(theta) {}
+    SpotlightMaterial(const Vec3f &kd, const Vec3f &ks, const Vec3f &e, double theta = defaultTheta)
+        : CommonLightMaterial(kd, ks, e), theta(theta) {
+        materialType_ = SPOT_LIGHT;
+    }
 
     const double theta;
     const Vec3f zeroEmission;

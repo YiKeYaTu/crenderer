@@ -151,7 +151,8 @@ public:
         double sampledScatteringT = samplePair.first;
         double tPDF = samplePair.second;
 
-        if (computedTransmittance.iterVolume.happened()) {
+        if (false) {
+//        if (computedTransmittance.iterVolume.happened()) {
             Vec3f particlePosition = ray.origin + ray.direction * sampledScatteringT;
             // if ray doesn't intersect any object,
             // or the sampled time lesser than intersected time
@@ -243,6 +244,7 @@ private:
             }
         }
 
+//        if (false) {
         if (util::getRandom01() < russiaRatio) {
             Vec3f intersectedObjectNormal = iterObject.intersectedObject()
                     ->computeNormal(iterObject.hitPoint()).normalized();

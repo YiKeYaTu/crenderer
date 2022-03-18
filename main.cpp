@@ -15,7 +15,7 @@
 
 const std::string prefix = "../models/";
 
-CommonMaterial specularMaterial(Vec3f(0.725f, 0.71f, 0.68f), Vec3f(), Vec3f(), CommonMaterial::SPECULAR);
+CommonMaterial specularMaterial(Vec3f(0.725f, 0.71f, 0.68f), Vec3f(), Vec3f(), PropertyType::SPECULAR);
 //CommonMaterial redMaterial(Vec3f(0.63f, 0.065f, 0.05f), Vec3f());
 //CommonMaterial greenMaterial(Vec3f(0.14f, 0.45f, 0.091f), Vec3f());
 //CommonMaterial whiteMaterial(Vec3f(0.725f, 0.71f, 0.68f), Vec3f());

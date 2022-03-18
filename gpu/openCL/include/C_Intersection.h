@@ -5,7 +5,7 @@
 #ifndef OPENCL_C_INTERSECTION_H
 #define OPENCL_C_INTERSECTION_H
 
-#include "C_Object.h"
+#include "object/C_Object.h"
 #include "C_Ray.h"
 #include "C_BVH.h"
 

@@ -15,7 +15,7 @@ namespace DefaultScene {
     const std::string prefix = "../models/";
 
     std::shared_ptr<Scene> getCornellVolumeBox() {
-        static CommonMaterial specularMaterial(Vec3f(0.725f, 0.71f, 0.68f), Vec3f(), Vec3f(), CommonMaterial::SPECULAR);
+        static CommonMaterial specularMaterial(Vec3f(0.725f, 0.71f, 0.68f), Vec3f(), Vec3f(), PropertyType ::SPECULAR);
         static CommonLightMaterial lightMaterial(Vec3f(0.65f, 0.65f, 0.65f), Vec3f(), (Vec3f(0.747f+0.058f, 0.747f+0.258f, 0.747f)*8.0f + Vec3f(0.740f+0.287f,0.740f+0.160f,0.740f)*15.6f + Vec3f(0.737f+0.642f,0.737f+0.159f,0.737f)*18.4f));
         static SpotlightMaterial spotlightMaterial(Vec3f(0.65f, 0.65f, 0.65f), Vec3f(), (Vec3f(0.747f+0.058f, 0.747f+0.258f, 0.747f)*8.0f + Vec3f(0.740f+0.287f,0.740f+0.160f,0.740f)*15.6f + Vec3f(0.737f+0.642f,0.737f+0.159f,0.737f)*18.4f));
 
@@ -35,7 +35,7 @@ namespace DefaultScene {
         static MeshTriangle right = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/right.obj", greenMaterial);
         static Sphere sphereVolume(Vec3f(280, 305, 250.333), 400.0, &specularMaterial);
 
-        std::shared_ptr<Scene> scene(new Scene(1920, 1080, Vec3f(278, 273, -700), Vec3f(), 45));
+        std::shared_ptr<Scene> scene(new Scene(200, 200, Vec3f(278, 273, -700), Vec3f(), 45));
         scene->addObject(&left);
         scene->addObject(&right);
         scene->addObject(&spotlight);
