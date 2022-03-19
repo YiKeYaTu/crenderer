@@ -84,12 +84,13 @@ ComputedTransmittance computeTransmittance(
     global C_BVH* bvhNodes,
     global C_BVH* volumeBvhNodes,
     global C_Object* objects,
-    global C_Object* volumeObjects
+    global C_Object* volumeObjects,
+    global void* heapBuffer
 ) {
     float transmittance = 1.0, tEnterVolume, tLeaveVolume, tInVolume;
 
-    C_Intersection iterObject = intersectBVH(ray2somewhere, bvhNodes, objects);
-    C_Intersection iterVolume = intersectBVH(ray2somewhere, volumeBvhNodes, volumeObjects);
+    C_Intersection iterObject = intersectBVH(ray2somewhere, bvhNodes, objects, heapBuffer);
+    C_Intersection iterVolume = intersectBVH(ray2somewhere, volumeBvhNodes, volumeObjects, heapBuffer);
 
     if (iterVolume.happened) {
         tEnterVolume = min( iterVolume.tMin, iterObject.tMin );
@@ -160,7 +161,8 @@ SampledLight sampleLight(
                          
     size_t numLightObjects,
 
-    mwc64x_state_t* rng
+    mwc64x_state_t* rng,
+    global void* heapBuffer
 ) {
     float3 sampledLightPosition;
     float sampleRatio;
@@ -177,7 +179,7 @@ SampledLight sampleLight(
     float3 rayDir = normalize(sampledLightPosition - *point);
     C_Ray ray2light = initCray(point, &rayDir);
     
-    C_Intersection intersectionWithLight = intersectBVH(&ray2light, bvhNodes, objects);
+    C_Intersection intersectionWithLight = intersectBVH(&ray2light, bvhNodes, objects, heapBuffer);
     bool canReachLight = length(intersectionWithLight.hitPoint - sampledLightPosition) < 0.1;
 
     return initSampledLight(
@@ -246,7 +248,10 @@ float3 shadeParticle(
     mwc64x_state_t* rng,
     float3* coefficient,
     C_Ray* nextRay,
-    bool* next
+    bool* next,
+                     
+    uint depth,
+    global void* heapBuffer
 ) {
     *next = false;
     float sampledScatteringT = sampledScattering->t;
@@ -258,9 +263,9 @@ float3 shadeParticle(
     float3 negRayDir = -ray->direction;
 
     if (enableSampleLight) {
-        SampledLight sampledLightObj = sampleLight(&particlePosition, bvhNodes, objects, lightObjects, *numLightObjects, rng);
+        SampledLight sampledLightObj = sampleLight(&particlePosition, bvhNodes, objects, lightObjects, *numLightObjects, rng, heapBuffer);
         if (sampledLightObj.canReachLight) {
-            ComputedTransmittance computedTransmittance = computeTransmittance(&sampledLightObj.ray2light, bvhNodes, volumeBvhNodes, objects, volumeObjects);
+            ComputedTransmittance computedTransmittance = computeTransmittance(&sampledLightObj.ray2light, bvhNodes, volumeBvhNodes, objects, volumeObjects, heapBuffer);
             particleColor += sampledLightObj.sampledEmission
                              * computedTransmittance.transmittance
                              * (1.0f / 1.0f)
@@ -274,9 +279,9 @@ float3 shadeParticle(
         C_SampledDir sampleIndirectDirectionPair = sampleInScatteringDirection(rng);
         *nextRay = initCray(&particlePosition, &sampleIndirectDirectionPair.dir);
 
-        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
-
-        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
+//        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
+//
+//        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
             *next = true;
             *coefficient = Schlick(&sampleIndirectDirectionPair.dir, &negRayDir, 0.5)
                 * (sigS / sigT)
@@ -285,7 +290,7 @@ float3 shadeParticle(
                 * sigT
                 * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
                 * (1.0f / tPDF);
-        }
+//        }
     }
 
     particleColor = particleColor
@@ -314,7 +319,10 @@ float3 shadeSurface(
     mwc64x_state_t* rng,
     float3* coefficient,
     C_Ray* nextRay,
-    bool* next
+    bool* next,
+                    
+    uint depth,
+    global void* heapBuffer
 ) {
     *next = false;
     
@@ -322,7 +330,7 @@ float3 shadeSurface(
     float fromVolumeEntryToSurfaceT = computed2eyeTransmittance->iterObject.tMin - max(computed2eyeTransmittance->tEnterVolume, 0.f);
     
     if (hasEmission(&objects[iterObject.intersectedObjectIndex].material)) {
-        return objects[iterObject.intersectedObjectIndex].material.emission
+        return depth > 1 ? (float3) (0.f, 0.f, 0.f): objects[iterObject.intersectedObjectIndex].material.emission
             * computed2eyeTransmittance->transmittance
             * ( 1.0f / ( exp(-sigT * fromVolumeEntryToSurfaceT ) ) );
     }
@@ -332,10 +340,10 @@ float3 shadeSurface(
     float3 intersectedObjectNormal = computeNormal(&objects[iterObject.intersectedObjectIndex], &iterObject.hitPoint);
 
     if (enableSampleLight) {
-        SampledLight sampledLightObj = sampleLight(&iterObject.hitPoint, bvhNodes, objects, lightObjects, *numLightObjects, rng);
+        SampledLight sampledLightObj = sampleLight(&iterObject.hitPoint, bvhNodes, objects, lightObjects, *numLightObjects, rng, heapBuffer);
 
         if (sampledLightObj.canReachLight) {
-            ComputedTransmittance computed2lightTransmittance = computeTransmittance(&sampledLightObj.ray2light, bvhNodes, volumeBvhNodes, objects, volumeObjects);
+            ComputedTransmittance computed2lightTransmittance = computeTransmittance(&sampledLightObj.ray2light, bvhNodes, volumeBvhNodes, objects, volumeObjects, heapBuffer);
 
             surfaceColor += sampledLightObj.sampledEmission
                             * BRDF(&objects[iterObject.intersectedObjectIndex].material, &sampledLightObj.ray2light.direction, &negRayDir, &intersectedObjectNormal)
@@ -355,9 +363,9 @@ float3 shadeSurface(
         float cosNormalOutRay = dot(intersectedObjectNormal, sampleIndirectDirection);
 
         *nextRay = initCray(&iterObject.hitPoint, &sampleIndirectDirection);
-        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
+//        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
 
-        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
+//        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
             *next = true;
             *coefficient = BRDF(&objects[iterObject.intersectedObjectIndex].material, &sampleIndirectDirection, &negRayDir, &intersectedObjectNormal)
                 * cosNormalOutRay
@@ -365,14 +373,14 @@ float3 shadeSurface(
                 * computed2eyeTransmittance->transmittance
                 * (1.0f / exp( -sigT * fromVolumeEntryToSurfaceT ))
                 * (1.0f / russiaRatio);
-        }
+//        }
     }
 
     return surfaceColor;
 }
 
 float3 shade(
-     global C_Ray* ray,
+     local C_Ray* ray,
                    
      global C_BVH* bvhNodes,
      global C_BVH* volumeBvhNodes,
@@ -385,9 +393,10 @@ float3 shade(
      global uint* numVolumeObjects,
      global uint* numLightObjects,
      
-     size_t gid
+     size_t gid,
+     global void* heapBuffer
 ) {
-    int depth = 0;
+    uint depth = 0;
     float3 coefficient = (float3) (1.0f, 1.0f, 1.0f);
     float3 nextCoefficient;
     bool next = false;
@@ -400,13 +409,18 @@ float3 shade(
 
     while (true) {
         depth ++;
+        
+        if (depth > MAX_DEPTH) {
+            break;
+        }
+        
         float russiaRatio = 1.0;
-        if (depth > 5) { russiaRatio = 0.5; }
+        if (depth > START_RUSSIA_DEPTH) { russiaRatio = 0.5; }
 
         float3 surfaceColor = (float3) (0.f, 0.f, 0.f);
         float3 particleColor = (float3) (0.f, 0.f, 0.f);
 
-        ComputedTransmittance computedTransmittance = computeTransmittance(&localRay, bvhNodes, volumeBvhNodes, objects, volumeObjects);
+        ComputedTransmittance computedTransmittance = computeTransmittance(&localRay, bvhNodes, volumeBvhNodes, objects, volumeObjects, heapBuffer);
 
         SampledScattering sampledScattering = sampleScattering(sigT, max( computedTransmittance.tEnterVolume, 0.f ), &rng);
         float sampledScatteringT = sampledScattering.t;
@@ -437,7 +451,10 @@ float3 shade(
                     &rng,
                     &nextCoefficient,
                     &nextRay,
-                    &next
+                    &next,
+                                               
+                    depth,
+                    heapBuffer
                 );
             }
         }
@@ -462,7 +479,10 @@ float3 shade(
                 &rng,
                 &nextCoefficient,
                 &nextRay,
-                &next
+                &next,
+                                         
+                depth,
+                heapBuffer
             );
         }
 

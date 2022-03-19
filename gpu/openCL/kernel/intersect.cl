@@ -34,7 +34,52 @@ global C_BVH* getRightChild(global C_BVH* bvhNodes, global C_BVH* bvhNode) {
     return &bvhNodes[bvhNode->rightChildIndex];
 }
 
-C_Intersection intersectBVH(
+C_Intersection intersectBVHFaster(
+    C_Ray* ray,
+    global C_BVH* bvhNodes,
+    global C_Object* objects,
+    global void* heapBuffer
+) {
+    C_Intersection nearestIntersection = getEmptyIntersection();
+
+    size_t globalGid = get_global_id(0);
+    global int* bvhNodeIndexQueue = (global int*) &heapBuffer[globalGid * 63];
+    size_t i = -1;
+    size_t j = 1;
+    
+    bvhNodeIndexQueue[0] = 0;
+
+    while (++ i < j) {
+        global C_BVH* current = &bvhNodes[bvhNodeIndexQueue[i]];
+
+        if (current->leftChildIndex < 0 && current->rightChildIndex < 0) {
+            C_Intersection currentIntersection = intersect(ray, objects, current->objectIndex);
+
+            if (currentIntersection.happened && currentIntersection.tMin < nearestIntersection.tMin) {
+                nearestIntersection = currentIntersection;
+            }
+            continue;
+        }
+
+        C_Intersection intersection = intersectBounds3(ray, &current->bounds3);
+
+        if (!intersection.happened) {
+            continue;
+        }
+
+        if (current->leftChildIndex > 0) {
+            bvhNodeIndexQueue[j ++] = current->leftChildIndex;
+        }
+
+        if (current->rightChildIndex > 0) {
+            bvhNodeIndexQueue[j ++] = current->rightChildIndex;
+        }
+    }
+
+    return nearestIntersection;
+}
+
+C_Intersection intersectBVHSlower(
     C_Ray* ray,
     global C_BVH* bvhNodes,
     global C_Object* objects
@@ -108,6 +153,17 @@ C_Intersection intersectBVH(
 
         current = next;
     }
+}
+
+
+C_Intersection intersectBVH(
+    C_Ray* ray,
+    global C_BVH* bvhNodes,
+    global C_Object* objects,
+    global void* heapBuffer
+) {
+//    return intersectBVHFaster(ray, bvhNodes, objects, heapBuffer);
+    return intersectBVHSlower(ray, bvhNodes, objects);
 }
 
 C_Intersection intersectTriangle(C_Ray* ray, global C_Triangle* triangle, int objectIndex) {

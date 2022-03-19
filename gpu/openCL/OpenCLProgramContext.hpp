@@ -30,6 +30,11 @@ public:
         return std::vector<cl_platform_id>(platformIDs, platformIDs + numPlatforms);
     }
 
+    static OpenCLProgramContext createGPUContext() {
+        std::vector<cl_platform_id> platformIDs = getPlatformIDs();
+        return createGPUContext(platformIDs[0]);
+    }
+
     static OpenCLProgramContext createGPUContext(cl_platform_id platformID) {
         cl_context_properties contextProperties[] = {
             CL_CONTEXT_PLATFORM,
@@ -59,7 +64,7 @@ public:
         usedDeviceIDs_.push_back(deviceIDs_[idx]);
     }
 
-    void useProgram(const std::string& path, const std::string& options) {
+    void useProgram(const std::string& path, const std::string& options = "") {
         commandQueue_ = clCreateCommandQueue(context_, usedDeviceIDs_[0], 0, NULL);
         if (commandQueue_ == NULL) {
             throw std::runtime_error("Failed to create commandQueue for device 0");
@@ -107,8 +112,46 @@ public:
         return ret;
     }
 
-    void execute(OpenCLKernel& openClKernel) {
+    void waitForEvent(std::shared_ptr<cl_event> event) {
+        clWaitForEvents(1, event.get());
+    }
+
+    template<typename T>
+    T* mapWritingBuffer(cl_mem buffer, size_t dataLen) {
+        return static_cast<T*>(clEnqueueMapBuffer(
+            commandQueue_,
+            buffer,
+            CL_TRUE,
+            CL_MAP_WRITE,
+            0,
+            sizeof(T) * dataLen,
+            0,
+            NULL,
+            NULL,
+            NULL
+        ));
+    }
+
+    template<typename T>
+    T* mapReadingBuffer(cl_mem buffer, size_t dataLen) {
+        return static_cast<T*>(clEnqueueMapBuffer(
+                commandQueue_,
+                buffer,
+                CL_TRUE,
+                CL_MAP_READ,
+                0,
+                sizeof(T) * dataLen,
+                0,
+                NULL,
+                NULL,
+                NULL
+        ));
+    }
+
+    std::shared_ptr<cl_event> execute(OpenCLKernel& openClKernel) {
         assert(openClKernel.globalWorkSize_.size() > 0 && openClKernel.localWorkSize_.size() > 0);
+        std::shared_ptr<cl_event> event(new cl_event);
+
         processErrors_(clEnqueueNDRangeKernel(
             commandQueue_,
             openClKernel.kernel_,
@@ -118,8 +161,10 @@ public:
             &openClKernel.localWorkSize_[0],
             0,
             NULL,
-            NULL
+            event.get()
         ), "Failed to call clEnqueueNDRangeKernel.");
+
+        waitForEvent(event);
 
         for (const auto& item : openClKernel.memOutputObjects_) {
             processErrors_(clEnqueueReadBuffer(
@@ -135,6 +180,7 @@ public:
             );
         }
 
+        return event;
     }
 
 private:

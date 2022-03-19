@@ -26,12 +26,29 @@ public:
         localWorkSize_ = localWorkSize;
     }
 
+    cl_mem& setArguments(cl_mem_flags flags, std::size_t size, void* hostPtr, std::size_t pos) {
+        memInputObjects_.push_back(clCreateBuffer(
+                context_,
+                flags,
+                size,
+                hostPtr,
+                NULL
+        ));
+
+        if (memInputObjects_.back() == NULL) {
+            throw std::runtime_error("Error creating memory objects.");
+        }
+
+        clSetKernelArg(kernel_, pos, sizeof(cl_mem), &memInputObjects_.back());
+        return memInputObjects_.back();
+    }
+
     template<typename T>
-    void setInputArguments(std::size_t pos, T* data, std::size_t dataSize) {
+    void setInputArguments(std::size_t pos, T* data, std::size_t dataLen) {
         memInputObjects_.push_back(clCreateBuffer(
                 context_,
                 CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                sizeof(T) * dataSize,
+                sizeof(T) * dataLen,
                 data,
                 NULL
         ));
@@ -43,11 +60,11 @@ public:
         clSetKernelArg(kernel_, pos, sizeof(cl_mem), &memInputObjects_.back());
     }
     template<typename T>
-    void setInterArguments(std::size_t pos, T* data, std::size_t dataSize) {
+    void setInterArguments(std::size_t pos, T* data, std::size_t dataLen) {
         memInputObjects_.push_back(clCreateBuffer(
                 context_,
                 CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
-                sizeof(T) * dataSize,
+                sizeof(T) * dataLen,
                 data,
                 NULL
         ));
@@ -59,8 +76,8 @@ public:
         clSetKernelArg(kernel_, pos, sizeof(cl_mem), &memInputObjects_.back());
     }
     template<typename T>
-    void setOutputArguments(std::size_t pos, T* data, std::size_t dataSize) {
-        std::size_t totalSize = sizeof(T) * dataSize;
+    void setOutputArguments(std::size_t pos, T* data, std::size_t dataLen) {
+        std::size_t totalSize = sizeof(T) * dataLen;
         memOutputObjects_.emplace_back(
                 clCreateBuffer(
                         context_,

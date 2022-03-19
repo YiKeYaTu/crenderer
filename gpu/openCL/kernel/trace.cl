@@ -51,20 +51,28 @@ kernel void trace(
     global uint* numLightObjects,
                   
     global float3* frameBuffer
+//    global void* heapBuffer
 ) {
+    global void* heapBuffer;
     size_t globalGid = get_global_id(0);
     size_t localGid = get_local_id(0);
     size_t globalSize = get_global_size(0);
     size_t localSize = get_local_size(0);
     
-//    size_t idx = (globalGid + *offset) / localSize;
-//    size_t rayIdx = (globalGid + *offset) / localSize;
+    
     size_t idx = globalGid / localSize;
     
     local float3 pixelColors[HOST_SPP];
+    local C_Ray localRay;
+    
+    if (localGid == 0) {
+        localRay = ray[idx];
+    }
+    
+    barrier(CLK_LOCAL_MEM_FENCE);
     
     pixelColors[localGid] = shade(
-        &ray[idx],
+        &localRay,
 
         bvhNodes,
         volumeBvhNodes,
@@ -77,8 +85,8 @@ kernel void trace(
         numVolumeObjects,
         numLightObjects,
 
-        globalGid);
-//    pixelColors[localGid] = (float3) (.5f, .5f, .5f);
+        globalGid,
+        heapBuffer);
     
     barrier(CLK_LOCAL_MEM_FENCE);
     

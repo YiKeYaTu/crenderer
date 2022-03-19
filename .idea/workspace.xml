@@ -5,6 +5,7 @@
       <config projectName="crenderer" targetName="gpuShade" />
       <config projectName="crenderer" targetName="crenderer" />
       <config projectName="crenderer" targetName="gpuIntersectTest" />
+      <config projectName="crenderer" targetName="testOpenCLMemory" />
       <config projectName="crenderer" targetName="gpuTest" />
     </generated>
   </component>
@@ -18,27 +19,12 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DefaultScene.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/DefaultScene.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scene.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/Scene.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpu/openCL/OpenCLKernel.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/OpenCLKernel.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpu/openCL/OpenCLProgramContext.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/OpenCLProgramContext.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/include/C_Intersection.h" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/include/C_Intersection.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/include/C_Object.h" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/include/object/C_Object.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/include/C_Ray.h" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/include/C_Ray.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/include/C_Sphere.h" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/include/object/C_Sphere.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/include/C_Triangle.h" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/include/object/C_Triangle.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/include/OpenCLGlobal.h" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/include/OpenCLGlobal.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpu/openCL/OpenCLRenderer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/OpenCLRenderer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/intersect.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/intersect.cl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/shade.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/shade.cl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/trace.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/trace.cl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/translation/bvh2cBvh.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/translation/bvh2cBvh.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/translation/sphere2cSphere.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/translation/sphere2cSphere.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/translation/triangle2cTriangle.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/translation/triangle2cTriangle.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/test.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/material/CommonLightMaterial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/CommonLightMaterial.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/material/CommonMaterial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/CommonMaterial.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/material/SpotLightMaterial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/material/SpotLightMaterial.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/object/MeshTriangle.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/object/MeshTriangle.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/object/Triangle.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/object/Triangle.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shader/VolumeLightShader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/shader/VolumeLightShader.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,7 +73,7 @@
     <property name="cmake.loaded.for.project" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -99,6 +85,11 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.gpuShade">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="crenderer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="crenderer" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="crenderer" RUN_TARGET_NAME="crenderer">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -119,11 +110,17 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="testOpenCLMemory" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="testOpenCLMemory" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="crenderer" RUN_TARGET_NAME="testOpenCLMemory">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="CMake Application.crenderer" />
       <item itemvalue="CMake Application.gpuIntersectTest" />
       <item itemvalue="CMake Application.gpuShade" />
       <item itemvalue="CMake Application.gpuTest" />
+      <item itemvalue="CMake Application.testOpenCLMemory" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -145,7 +142,7 @@
       <workItem from="1647502404530" duration="9043000" />
       <workItem from="1647516978870" duration="15630000" />
       <workItem from="1647588802965" duration="2007000" />
-      <workItem from="1647591276047" duration="4433000" />
+      <workItem from="1647591276047" duration="14889000" />
     </task>
     <servers />
   </component>
@@ -162,16 +159,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/gpu/test.cpp</url>
-          <line>69</line>
-          <option name="timeStamp" value="28" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

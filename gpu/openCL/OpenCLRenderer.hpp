@@ -79,6 +79,8 @@ public:
         OpenCLKernel rayTraceKernel = openClProgramContext.createKernel("trace");
 
         cl_float3* frameBuffer = new cl_float3[width_ * height_];
+//        char* heapBuffer = (char*) malloc(width_ * height_ * spp_ * bvh_.size() * sizeof(int));
+
         size_t numObjects = objects_.size();
         size_t numVolumeObjects = volumes_.size();
         size_t numLightObjects = lights_.size();
@@ -99,6 +101,7 @@ public:
         rayTraceKernel.setInputArguments(8, &numLightObjects, 1);
 
         rayTraceKernel.setOutputArguments(9, frameBuffer, width_ * height_);
+//        rayTraceKernel.setInputArguments(10, heapBuffer, width_ * height_ * spp_ * bvh_.size() * sizeof(int));
 
         openClProgramContext.execute(rayTraceKernel);
 
@@ -130,6 +133,8 @@ private:
         optionStr.append("-I /Users/liangchen/CLionProjects/crenderer/gpu/openCL/ -D HOST_SPP=");
         optionStr.append(std::to_string(spp_));
         optionStr.append(" -D __OPENCL_C_VERSION__=\"120\"");
+        optionStr.append(" -D START_RUSSIA_DEPTH=1");
+        optionStr.append(" -D MAX_DEPTH=5");
 
         openClProgramContext.useDevice({0});
         openClProgramContext.useProgram(
