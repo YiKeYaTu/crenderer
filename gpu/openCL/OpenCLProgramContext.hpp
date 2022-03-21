@@ -196,7 +196,7 @@ private:
         setup_();
     }
 
-    void setup_() { useDevice( { 0 } ); }
+    void setup_() { useDevice(0); }
 
     void processBuildProgramErrors_(cl_int errNum) {
         if (errNum == CL_SUCCESS) {

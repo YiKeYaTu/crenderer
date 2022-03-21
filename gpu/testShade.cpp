@@ -14,8 +14,8 @@
 int main() {
     auto start = std::chrono::system_clock::now();
     std::shared_ptr<Scene> cornellVolumeBoxScene = DefaultScene::getCornellVolumeBox();
-    OpenCLRenderer openClRenderer(*cornellVolumeBoxScene);
-    openClRenderer.render();
+    OpenCLRenderer openClRenderer(*cornellVolumeBoxScene, "../gpu/openCL/kernel/trace.cl");
+    openClRenderer.render(100 * 100);
     auto stop = std::chrono::system_clock::now();
 
     std::cout << "Render complete: \n";

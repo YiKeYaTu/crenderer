@@ -157,7 +157,7 @@ public:
         }
     }
 
-    Vec3f& cameraPos() { return cameraPos_; }
+    const Vec3f& cameraPos() const { return cameraPos_; }
     const std::vector<Object *>& objects() const { return objects_; }
     const std::vector<Object *>& lights() const { return lights_; }
     const std::vector<Object *>& volumes() const { return volumes_; }

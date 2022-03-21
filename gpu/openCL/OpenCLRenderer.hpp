@@ -6,6 +6,8 @@
 #define CRENDERER_OPENCLRENDERER_HPP
 
 #include <vector>
+#include <chrono>
+#include <thread>
 
 #include "../../Scene.hpp"
 #include "include/object/C_Object.h"
@@ -28,10 +30,17 @@ class OpenCLRenderer {
     std::vector<C_BVH> volumeBvh_;
     cl_uint spp_ = 32;
 
+    OpenCLProgramContext openClProgramContext_;
+
 public:
-    OpenCLRenderer(Scene& scene)
-        : width_(scene.width()), height_(scene.height()), fov_(scene.fov()) {
-        Vec3f& cameraPos = scene.cameraPos();
+    OpenCLRenderer(const Scene& scene, const std::string& programPath, cl_uint spp = 32)
+        : width_(scene.width()),
+          height_(scene.height()),
+          fov_(scene.fov()),
+          spp_(spp),
+          openClProgramContext_(createOpenCLProgramContext_(programPath)
+    ) {
+        const Vec3f& cameraPos = scene.cameraPos();
 
         cameraPos_.x = cameraPos.x();
         cameraPos_.y = cameraPos.y();
@@ -57,13 +66,60 @@ public:
         frameBuffer_.resize(width_ * height_);
     }
 
-    void render() {
-        OpenCLProgramContext openClProgramContext = createOpenCLProgramContext_();
-        OpenCLKernel rayGenKernel = openClProgramContext.createKernel("generateMultipleRays");
+    void render(cl_uint fragmentSize, int delayPerFragment = 10) {
+        C_Ray* rays = generateRays_();
+        cl_float3* frameBuffer = generateFrameBuffer_();
 
+        size_t numObjects = objects_.size();
+        size_t numVolumeObjects = volumes_.size();
+        size_t numLightObjects = lights_.size();
+
+        OpenCLKernel rayTraceKernel = openClProgramContext_.createKernel("trace");
+
+        cl_uint renderedFragmentSize = 0, totalFragmentSize = width_ * height_;
+
+        while (renderedFragmentSize < totalFragmentSize) {
+            fragmentSize = renderedFragmentSize + fragmentSize > totalFragmentSize ? totalFragmentSize - renderedFragmentSize :
+                    fragmentSize;
+            renderedFragmentSize += fragmentSize;
+
+            rayTraceKernel.setWorkSize( { fragmentSize * spp_ }, { spp_ } );
+
+            rayTraceKernel.setInterArguments(0, rays + renderedFragmentSize, fragmentSize);
+            rayTraceKernel.setInputArguments(1, &bvh_[0], bvh_.size());
+            rayTraceKernel.setInputArguments(2, &volumeBvh_[0], volumeBvh_.size());
+            rayTraceKernel.setInputArguments(3, &objects_[0], objects_.size());
+            rayTraceKernel.setInputArguments(4, &volumes_[0], volumes_.size());
+            rayTraceKernel.setInputArguments(5, &lights_[0], lights_.size());
+            rayTraceKernel.setInputArguments(6, &numObjects, 1);
+            rayTraceKernel.setInputArguments(7, &numVolumeObjects, 1);
+            rayTraceKernel.setInputArguments(8, &numLightObjects, 1);
+            rayTraceKernel.setInterArguments(9, frameBuffer + renderedFragmentSize, fragmentSize);
+
+            openClProgramContext_.execute(rayTraceKernel);
+            util::UpdateProgress(static_cast<float>(renderedFragmentSize) / totalFragmentSize);
+
+            if (renderedFragmentSize < totalFragmentSize) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(delayPerFragment));
+            }
+        }
+
+        saveFrameBufferAsPPM(frameBuffer);
+
+        delete[] frameBuffer;
+        delete[] rays;
+    }
+
+private:
+    cl_float3* generateFrameBuffer_() {
+        cl_float3* frameBuffer = new cl_float3[width_ * height_];
+        return frameBuffer;
+    }
+
+    C_Ray* generateRays_() {
+        OpenCLKernel rayGenKernel = openClProgramContext_.createKernel("generateMultipleRays");
         cl_float aspectRatio = static_cast<cl_float>(width_) / height_;
         cl_float scale = std::tan((fov_ / 2) / 180 * util::MY_PI);
-        int numSplit = 10;
 
         C_Ray* rays = new C_Ray[width_ * height_];
         rayGenKernel.setWorkSize( { width_ * height_ }, { 1 } );
@@ -74,44 +130,10 @@ public:
         rayGenKernel.setInputArguments(4, &aspectRatio, 1);
         rayGenKernel.setInputArguments(5, &scale, 1);
 
-        openClProgramContext.execute(rayGenKernel);
-
-        OpenCLKernel rayTraceKernel = openClProgramContext.createKernel("trace");
-
-        cl_float3* frameBuffer = new cl_float3[width_ * height_];
-//        char* heapBuffer = (char*) malloc(width_ * height_ * spp_ * bvh_.size() * sizeof(int));
-
-        size_t numObjects = objects_.size();
-        size_t numVolumeObjects = volumes_.size();
-        size_t numLightObjects = lights_.size();
-
-        rayTraceKernel.setWorkSize( { width_ * height_ * spp_ }, { spp_ } );
-
-        rayTraceKernel.setInterArguments(0, rays, width_ * height_);
-
-        rayTraceKernel.setInputArguments(1, &bvh_[0], bvh_.size());
-        rayTraceKernel.setInputArguments(2, &volumeBvh_[0], volumeBvh_.size());
-
-        rayTraceKernel.setInputArguments(3, &objects_[0], objects_.size());
-        rayTraceKernel.setInputArguments(4, &volumes_[0], volumes_.size());
-        rayTraceKernel.setInputArguments(5, &lights_[0], lights_.size());
-
-        rayTraceKernel.setInputArguments(6, &numObjects, 1);
-        rayTraceKernel.setInputArguments(7, &numVolumeObjects, 1);
-        rayTraceKernel.setInputArguments(8, &numLightObjects, 1);
-
-        rayTraceKernel.setOutputArguments(9, frameBuffer, width_ * height_);
-//        rayTraceKernel.setInputArguments(10, heapBuffer, width_ * height_ * spp_ * bvh_.size() * sizeof(int));
-
-        openClProgramContext.execute(rayTraceKernel);
-
-        saveFrameBufferAsPPM(frameBuffer);
-
-        delete[] frameBuffer;
-        delete[] rays;
+        openClProgramContext_.execute(rayGenKernel);
+        return rays;
     }
 
-private:
     void saveFrameBufferAsPPM(cl_float3* frameBuffer) {
         FILE* fp = fopen("test_gpu.ppm", "wb");
         (void)fprintf(fp, "P6\n%d %d\n255\n", width_, height_);
@@ -124,21 +146,21 @@ private:
         }
         fclose(fp);
     }
-    OpenCLProgramContext createOpenCLProgramContext_() {
+    OpenCLProgramContext createOpenCLProgramContext_(std::string programPath) {
         cl_uint numPlatforms = OpenCLProgramContext::getNumPlatforms();
         std::vector<cl_platform_id> platformIDs = OpenCLProgramContext::getPlatformIDs(numPlatforms);
-        OpenCLProgramContext openClProgramContext = OpenCLProgramContext::createGPUContext(platformIDs[0]);
+        OpenCLProgramContext openClProgramContext = OpenCLProgramContext::createGPUContext();
 
         std::string optionStr;
-        optionStr.append("-I /Users/liangchen/CLionProjects/crenderer/gpu/openCL/ -D HOST_SPP=");
+        optionStr.append("-I ../gpu/openCL/ -D HOST_SPP=");
         optionStr.append(std::to_string(spp_));
         optionStr.append(" -D __OPENCL_C_VERSION__=\"120\"");
-        optionStr.append(" -D START_RUSSIA_DEPTH=1");
-        optionStr.append(" -D MAX_DEPTH=5");
+        optionStr.append(" -D START_RUSSIA_DEPTH=5");
+        optionStr.append(" -D MAX_DEPTH=10");
 
         openClProgramContext.useDevice({0});
         openClProgramContext.useProgram(
-                "/Users/liangchen/CLionProjects/crenderer/gpu/openCL/kernel/trace.cl",
+                programPath,
                 optionStr.c_str()
         );
         return openClProgramContext;

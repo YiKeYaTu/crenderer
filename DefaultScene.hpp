@@ -35,7 +35,7 @@ namespace DefaultScene {
         static MeshTriangle right = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/right.obj", greenMaterial);
         static Sphere sphereVolume(Vec3f(280, 305, 250.333), 400.0, &specularMaterial);
 
-        std::shared_ptr<Scene> scene(new Scene(500, 500, Vec3f(278, 273, -700), Vec3f(), 45));
+        std::shared_ptr<Scene> scene(new Scene(1920, 1080, Vec3f(278, 273, -700), Vec3f(), 45));
         scene->addObject(&left);
         scene->addObject(&right);
         scene->addObject(&spotlight);

@@ -282,14 +282,14 @@ float3 shadeParticle(
 //        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
 //
 //        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
-            *next = true;
-            *coefficient = Schlick(&sampleIndirectDirectionPair.dir, &negRayDir, 0.5)
-                * (sigS / sigT)
-                * (1.0f / sampleIndirectDirectionPair.pdf)
-                * (1.0f / russiaRatio)
-                * sigT
-                * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
-                * (1.0f / tPDF);
+        *next = true;
+        *coefficient = Schlick(&sampleIndirectDirectionPair.dir, &negRayDir, 0.5)
+            * (sigS / sigT)
+            * (1.0f / sampleIndirectDirectionPair.pdf)
+            * (1.0f / russiaRatio)
+            * sigT
+            * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
+            * (1.0f / tPDF);
 //        }
     }
 
@@ -366,13 +366,13 @@ float3 shadeSurface(
 //        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
 
 //        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
-            *next = true;
-            *coefficient = BRDF(&objects[iterObject.intersectedObjectIndex].material, &sampleIndirectDirection, &negRayDir, &intersectedObjectNormal)
-                * cosNormalOutRay
-                * (1.0f / sampleIndirectDirectionRatio)
-                * computed2eyeTransmittance->transmittance
-                * (1.0f / exp( -sigT * fromVolumeEntryToSurfaceT ))
-                * (1.0f / russiaRatio);
+        *next = true;
+        *coefficient = BRDF(&objects[iterObject.intersectedObjectIndex].material, &sampleIndirectDirection, &negRayDir, &intersectedObjectNormal)
+            * cosNormalOutRay
+            * (1.0f / sampleIndirectDirectionRatio)
+            * computed2eyeTransmittance->transmittance
+            * (1.0f / exp( -sigT * fromVolumeEntryToSurfaceT ))
+            * (1.0f / russiaRatio);
 //        }
     }
 
@@ -415,7 +415,7 @@ float3 shade(
         }
         
         float russiaRatio = 1.0;
-        if (depth > START_RUSSIA_DEPTH) { russiaRatio = 0.5; }
+        if (depth > START_RUSSIA_DEPTH) { russiaRatio = 0.8; }
 
         float3 surfaceColor = (float3) (0.f, 0.f, 0.f);
         float3 particleColor = (float3) (0.f, 0.f, 0.f);

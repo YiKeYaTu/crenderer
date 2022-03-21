@@ -17,14 +17,12 @@
   <component name="ChangeListManager">
     <list default="true" id="78897feb-7e53-4746-8860-242c4d981831" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DefaultScene.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/DefaultScene.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/OpenCLKernel.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/OpenCLKernel.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scene.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/Scene.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpu/openCL/OpenCLProgramContext.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/OpenCLProgramContext.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpu/openCL/OpenCLRenderer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/OpenCLRenderer.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/intersect.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/intersect.cl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/shade.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/shade.cl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/trace.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/trace.cl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpu/testShade.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/testShade.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +140,7 @@
       <workItem from="1647502404530" duration="9043000" />
       <workItem from="1647516978870" duration="15630000" />
       <workItem from="1647588802965" duration="2007000" />
-      <workItem from="1647591276047" duration="14889000" />
+      <workItem from="1647591276047" duration="17792000" />
     </task>
     <servers />
   </component>
