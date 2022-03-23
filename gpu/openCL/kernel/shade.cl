@@ -279,9 +279,6 @@ float3 shadeParticle(
         C_SampledDir sampleIndirectDirectionPair = sampleInScatteringDirection(rng);
         *nextRay = initCray(&particlePosition, &sampleIndirectDirectionPair.dir);
 
-//        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
-//
-//        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
         *next = true;
         *coefficient = Schlick(&sampleIndirectDirectionPair.dir, &negRayDir, 0.5)
             * (sigS / sigT)
@@ -290,7 +287,6 @@ float3 shadeParticle(
             * sigT
             * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
             * (1.0f / tPDF);
-//        }
     }
 
     particleColor = particleColor
@@ -363,9 +359,7 @@ float3 shadeSurface(
         float cosNormalOutRay = dot(intersectedObjectNormal, sampleIndirectDirection);
 
         *nextRay = initCray(&iterObject.hitPoint, &sampleIndirectDirection);
-//        C_Intersection nextIter = intersectBVH(nextRay, bvhNodes, objects);
-
-//        if (!nextIter.happened || !hasEmission(&objects[nextIter.intersectedObjectIndex].material)) {
+        
         *next = true;
         *coefficient = BRDF(&objects[iterObject.intersectedObjectIndex].material, &sampleIndirectDirection, &negRayDir, &intersectedObjectNormal)
             * cosNormalOutRay
@@ -373,7 +367,6 @@ float3 shadeSurface(
             * computed2eyeTransmittance->transmittance
             * (1.0f / exp( -sigT * fromVolumeEntryToSurfaceT ))
             * (1.0f / russiaRatio);
-//        }
     }
 
     return surfaceColor;

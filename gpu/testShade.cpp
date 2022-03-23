@@ -10,11 +10,14 @@
 #include "openCL/translation/ray2cRay.hpp"
 #include "../DefaultScene.hpp"
 #include "openCL/OpenCLRenderer.hpp"
+#include <vector>
+
+int start = 0;
 
 int main() {
     auto start = std::chrono::system_clock::now();
     std::shared_ptr<Scene> cornellVolumeBoxScene = DefaultScene::getCornellVolumeBox();
-    OpenCLRenderer openClRenderer(*cornellVolumeBoxScene, "../gpu/openCL/kernel/trace.cl");
+    OpenCLRenderer openClRenderer(*cornellVolumeBoxScene, "../gpu/openCL/kernel/trace.cl", 256);
     openClRenderer.render(100 * 100);
     auto stop = std::chrono::system_clock::now();
 
