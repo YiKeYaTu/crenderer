@@ -174,7 +174,7 @@ SampledLight sampleLight(
 
     float3 sampledLightNormal = computeNormal(light, &sampledLightPosition);
     float3 sampledEmission = getEmission(&light->material, point, &sampledLightPosition, &sampledLightNormal, light)
-        * (1.0f / r2)
+        * (1.0f / max( r2, 1.0f ))
         * max(dot(sampledLightNormal, light2point) / length(sampledLightNormal) / length(light2point), 0.f);
     
     float3 rayDir = normalize(sampledLightPosition - *point);
@@ -211,6 +211,7 @@ float Schlick(float3* wi, float3* wo, float k) {
     return (1 - k2) / (4 * M_PI * pow(1 + k * c, 2));
 }
 
+
 C_SampledDir sampleInScatteringDirection(mwc64x_state_t* rng) {
     float a = 2 * M_PI * rand(rng);
     float b = 2 * M_PI * rand(rng);
@@ -233,7 +234,7 @@ float3 shadeParticle(
     C_Ray* ray,
     float russiaRatio,
     SampledScattering* sampledScattering,
-    ComputedTransmittance* computedTransmittance,
+    ComputedTransmittance* computed2eyeTransmittance,
                      
     global C_BVH* bvhNodes,
     global C_BVH* volumeBvhNodes,
@@ -286,18 +287,19 @@ float3 shadeParticle(
                 * (1.0f / sampleIndirectDirectionPair.pdf)
                 * (1.0f / russiaRatio)
                 * sigT
-                * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
+                * exp( -sigT * ( computed2eyeTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computed2eyeTransmittance->tEnterVolume) : sampledScatteringT ) )
                 * (1.0f / tPDF);
 
-            *computedTransmittance = nextComputedTransmittance;
+            *computed2eyeTransmittance = nextComputedTransmittance;
             *next = true;
         }
     }
 
     particleColor = particleColor
                     * sigT
-                    * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
+                    * exp( -sigT * ( computed2eyeTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computed2eyeTransmittance->tEnterVolume) : sampledScatteringT ) )
                     * (1.0f / tPDF);
+    
     return particleColor;
 }
 

@@ -30,7 +30,7 @@ namespace DefaultScene {
         static MeshTriangle light = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/light.obj", lightMaterial);
         static MeshTriangle floor = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/floor.obj", whiteMaterial);
         static MeshTriangle spotlight = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/light.obj",
-                                                                            lightMaterial);
+                                                                            spotlightMaterial);
         static MeshTriangle left = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/left.obj", redMaterial);
         static MeshTriangle right = MeshTriangle::loadObjectFromObjFile(prefix + "cornellbox/right.obj", greenMaterial);
         static Sphere sphereVolume(Vec3f(280, 305, 250.333), 400.0, &specularMaterial);
