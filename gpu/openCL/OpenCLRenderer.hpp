@@ -66,7 +66,7 @@ public:
         frameBuffer_.resize(width_ * height_);
     }
 
-    void render(cl_uint fragmentSize, int delayPerFragment = 10) {
+    void render(cl_uint fragmentSize, int delayPerFragment = 40) {
         C_Ray* rays = generateRays_();
         cl_float3* frameBuffer = generateFrameBuffer_();
 

@@ -99,6 +99,7 @@ ComputedTransmittance computeTransmittance(
         transmittance = exp( -sigT * tInVolume );
     } else {
         tEnterVolume = tLeaveVolume = tInVolume = 0;
+        transmittance = 1.0f;
     }
     
     ComputedTransmittance computedTransmittance = {
@@ -253,7 +254,6 @@ float3 shadeParticle(
     uint depth,
     global void* heapBuffer
 ) {
-    *next = false;
     float sampledScatteringT = sampledScattering->t;
     float tPDF = sampledScattering->pdf;
 
@@ -278,15 +278,20 @@ float3 shadeParticle(
     if (rand(rng) < russiaRatio) {
         C_SampledDir sampleIndirectDirectionPair = sampleInScatteringDirection(rng);
         *nextRay = initCray(&particlePosition, &sampleIndirectDirectionPair.dir);
+        ComputedTransmittance nextComputedTransmittance = computeTransmittance(nextRay, bvhNodes, volumeBvhNodes, objects, volumeObjects, heapBuffer);
 
-        *next = true;
-        *coefficient = Schlick(&sampleIndirectDirectionPair.dir, &negRayDir, 0.5)
-            * (sigS / sigT)
-            * (1.0f / sampleIndirectDirectionPair.pdf)
-            * (1.0f / russiaRatio)
-            * sigT
-            * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
-            * (1.0f / tPDF);
+        if (!hasEmission(&objects[nextComputedTransmittance.iterObject.intersectedObjectIndex].material)) {
+            *coefficient = Schlick(&sampleIndirectDirectionPair.dir, &negRayDir, 0.5)
+                * (sigS / sigT)
+                * (1.0f / sampleIndirectDirectionPair.pdf)
+                * (1.0f / russiaRatio)
+                * sigT
+                * exp( -sigT * ( computedTransmittance->tEnterVolume >= 0 ? (sampledScatteringT - computedTransmittance->tEnterVolume) : sampledScatteringT ) )
+                * (1.0f / tPDF);
+
+            *computedTransmittance = nextComputedTransmittance;
+            *next = true;
+        }
     }
 
     particleColor = particleColor
@@ -320,13 +325,11 @@ float3 shadeSurface(
     uint depth,
     global void* heapBuffer
 ) {
-    *next = false;
-    
     C_Intersection iterObject = computed2eyeTransmittance->iterObject;
     float fromVolumeEntryToSurfaceT = computed2eyeTransmittance->iterObject.tMin - max(computed2eyeTransmittance->tEnterVolume, 0.f);
     
     if (hasEmission(&objects[iterObject.intersectedObjectIndex].material)) {
-        return depth > 1 ? (float3) (0.f, 0.f, 0.f): objects[iterObject.intersectedObjectIndex].material.emission
+        return objects[iterObject.intersectedObjectIndex].material.emission
             * computed2eyeTransmittance->transmittance
             * ( 1.0f / ( exp(-sigT * fromVolumeEntryToSurfaceT ) ) );
     }
@@ -359,14 +362,19 @@ float3 shadeSurface(
         float cosNormalOutRay = dot(intersectedObjectNormal, sampleIndirectDirection);
 
         *nextRay = initCray(&iterObject.hitPoint, &sampleIndirectDirection);
+        ComputedTransmittance nextComputedTransmittance = computeTransmittance(nextRay, bvhNodes, volumeBvhNodes, objects, volumeObjects, heapBuffer);
         
-        *next = true;
-        *coefficient = BRDF(&objects[iterObject.intersectedObjectIndex].material, &sampleIndirectDirection, &negRayDir, &intersectedObjectNormal)
-            * cosNormalOutRay
-            * (1.0f / sampleIndirectDirectionRatio)
-            * computed2eyeTransmittance->transmittance
-            * (1.0f / exp( -sigT * fromVolumeEntryToSurfaceT ))
-            * (1.0f / russiaRatio);
+        if (!hasEmission(&objects[nextComputedTransmittance.iterObject.intersectedObjectIndex].material)) {
+            *coefficient = BRDF(&objects[iterObject.intersectedObjectIndex].material, &sampleIndirectDirection, &negRayDir, &intersectedObjectNormal)
+                * cosNormalOutRay
+                * (1.0f / sampleIndirectDirectionRatio)
+                * computed2eyeTransmittance->transmittance
+                * (1.0f / exp( -sigT * fromVolumeEntryToSurfaceT ))
+                * (1.0f / russiaRatio);
+            
+            *next = true;
+            *computed2eyeTransmittance = nextComputedTransmittance;
+        }
     }
 
     return surfaceColor;
@@ -392,16 +400,19 @@ float3 shade(
     uint depth = 0;
     float3 coefficient = (float3) (1.0f, 1.0f, 1.0f);
     float3 nextCoefficient;
-    bool next = false;
+    bool next;
     
     float3 computedPixelColor = (float3) (0.f, 0.f, 0.f);
     
     mwc64x_state_t rng = genSeed(gid, 1);
     C_Ray localRay = *ray;
     C_Ray nextRay;
+    
+    ComputedTransmittance computedTransmittance = computeTransmittance(&localRay, bvhNodes, volumeBvhNodes, objects, volumeObjects, heapBuffer);
 
     while (true) {
         depth ++;
+        next = false;
         
         if (depth > MAX_DEPTH) {
             break;
@@ -412,8 +423,6 @@ float3 shade(
 
         float3 surfaceColor = (float3) (0.f, 0.f, 0.f);
         float3 particleColor = (float3) (0.f, 0.f, 0.f);
-
-        ComputedTransmittance computedTransmittance = computeTransmittance(&localRay, bvhNodes, volumeBvhNodes, objects, volumeObjects, heapBuffer);
 
         SampledScattering sampledScattering = sampleScattering(sigT, max( computedTransmittance.tEnterVolume, 0.f ), &rng);
         float sampledScatteringT = sampledScattering.t;
@@ -445,7 +454,7 @@ float3 shade(
                     &nextCoefficient,
                     &nextRay,
                     &next,
-                                               
+
                     depth,
                     heapBuffer
                 );
@@ -481,6 +490,7 @@ float3 shade(
 
         computedPixelColor += coefficient * (surfaceColor + particleColor);
         coefficient = nextCoefficient;
+        localRay = nextRay;
         
         if (!next) {
             break;

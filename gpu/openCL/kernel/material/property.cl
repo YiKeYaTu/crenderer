@@ -13,7 +13,7 @@ C_SampledDir sampleDiffuseDir(global C_Material* material, float3* wi, float3* n
 
     float x = 1 * cos(a);
     float y = 1 * sin(a);
-    float z = sqrt(x * x + y * y) * tan(b);
+    float z = 1 * sin(b);
 
     float3 dir = (float3) (x, y, z);
 
