@@ -50,7 +50,8 @@ kernel void trace(
     global uint* numVolumeObjects,
     global uint* numLightObjects,
                   
-    global float3* frameBuffer
+    global float3* frameBuffer,
+    global size_t* offset
 //    global void* heapBuffer
 ) {
     global void* heapBuffer;
@@ -86,7 +87,8 @@ kernel void trace(
         numLightObjects,
 
         globalGid,
-        heapBuffer);
+        offset,
+        0);
     
     barrier(CLK_LOCAL_MEM_FENCE);
     

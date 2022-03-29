@@ -218,7 +218,7 @@ C_SampledDir sampleInScatteringDirection(mwc64x_state_t* rng) {
 
     float x = 1 * cos(a);
     float y = 1 * sin(a);
-    float z = sqrt(x * x + y * y) * tan(b);
+    float z = 1 * sin(b);
 
     float3 direction = (float3) (x, y, z);
     
@@ -397,6 +397,7 @@ float3 shade(
      global uint* numLightObjects,
      
      size_t gid,
+     size_t offset,
      global void* heapBuffer
 ) {
     uint depth = 0;
@@ -406,7 +407,7 @@ float3 shade(
     
     float3 computedPixelColor = (float3) (0.f, 0.f, 0.f);
     
-    mwc64x_state_t rng = genSeed(gid, 1);
+    mwc64x_state_t rng = genSeed(offset + gid, get_local_id(0));
     C_Ray localRay = *ray;
     C_Ray nextRay;
     

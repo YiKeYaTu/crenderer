@@ -18,7 +18,10 @@
     <list default="true" id="78897feb-7e53-4746-8860-242c4d981831" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DefaultScene.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/DefaultScene.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpu/openCL/OpenCLRenderer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/OpenCLRenderer.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/shade.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/shade.cl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpu/openCL/kernel/trace.cl" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/openCL/kernel/trace.cl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gpu/testShade.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gpu/testShade.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,11 +82,6 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.gpuShade">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="crenderer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="crenderer" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="crenderer" RUN_TARGET_NAME="crenderer">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -137,7 +135,8 @@
       <workItem from="1647516978870" duration="15630000" />
       <workItem from="1647588802965" duration="2007000" />
       <workItem from="1647591276047" duration="21935000" />
-      <workItem from="1648033893777" duration="9671000" />
+      <workItem from="1648033893777" duration="16131000" />
+      <workItem from="1648534449256" duration="2000" />
     </task>
     <servers />
   </component>

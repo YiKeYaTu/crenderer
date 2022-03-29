@@ -28,7 +28,7 @@ class OpenCLRenderer {
 
     std::vector<C_BVH> bvh_;
     std::vector<C_BVH> volumeBvh_;
-    cl_uint spp_ = 32;
+    cl_uint spp_;
 
     OpenCLProgramContext openClProgramContext_;
 
@@ -81,11 +81,10 @@ public:
         while (renderedFragmentSize < totalFragmentSize) {
             fragmentSize = renderedFragmentSize + fragmentSize > totalFragmentSize ? totalFragmentSize - renderedFragmentSize :
                     fragmentSize;
-            renderedFragmentSize += fragmentSize;
 
             rayTraceKernel.setWorkSize( { fragmentSize * spp_ }, { spp_ } );
 
-            rayTraceKernel.setInterArguments(0, rays + renderedFragmentSize, fragmentSize);
+            rayTraceKernel.setInputArguments(0, rays + renderedFragmentSize, fragmentSize);
             rayTraceKernel.setInputArguments(1, &bvh_[0], bvh_.size());
             rayTraceKernel.setInputArguments(2, &volumeBvh_[0], volumeBvh_.size());
             rayTraceKernel.setInputArguments(3, &objects_[0], objects_.size());
@@ -95,6 +94,9 @@ public:
             rayTraceKernel.setInputArguments(7, &numVolumeObjects, 1);
             rayTraceKernel.setInputArguments(8, &numLightObjects, 1);
             rayTraceKernel.setInterArguments(9, frameBuffer + renderedFragmentSize, fragmentSize);
+            rayTraceKernel.setInputArguments(10, &renderedFragmentSize, 1);
+
+            renderedFragmentSize += fragmentSize;
 
             openClProgramContext_.execute(rayTraceKernel);
             util::UpdateProgress(static_cast<float>(renderedFragmentSize) / totalFragmentSize);
@@ -155,8 +157,8 @@ private:
         optionStr.append("-I ../gpu/openCL/ -D HOST_SPP=");
         optionStr.append(std::to_string(spp_));
         optionStr.append(" -D __OPENCL_C_VERSION__=\"120\"");
-        optionStr.append(" -D START_RUSSIA_DEPTH=5");
-        optionStr.append(" -D MAX_DEPTH=10");
+        optionStr.append(" -D START_RUSSIA_DEPTH=1");
+        optionStr.append(" -D MAX_DEPTH=5");
 
         openClProgramContext.useDevice({0});
         openClProgramContext.useProgram(
