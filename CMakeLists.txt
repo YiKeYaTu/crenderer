@@ -5,11 +5,14 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package( OpenCL REQUIRED )
 
+include_directories(./)
+
 add_executable( crenderer main.cpp)
 add_executable( gpuTest gpu/test.cpp )
 add_executable( gpuIntersectTest gpu/testIntersec.cpp )
 add_executable( gpuShade gpu/testShade.cpp )
 add_executable( testOpenCLMemory gpu/testOpenCLMemory.cpp )
+add_executable( testVecMat testVecMat.cpp )
 
 target_link_libraries( crenderer OpenCL::OpenCL )
 target_link_libraries( gpuTest OpenCL::OpenCL )
