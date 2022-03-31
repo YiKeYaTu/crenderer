@@ -5,145 +5,92 @@
 #ifndef CRENDERER_VEC_HPP
 #define CRENDERER_VEC_HPP
 
-#include <functional>
-#include <vector>
-#include <iostream>
+#include <core/Mat.hpp>
 #include <cmath>
-#include <assert.h>
+#include <iostream>
 
-#define arithmeticalCreatingVec(op) \
-friend \
-Vec operator op(const Vec& lhs, const Vec& rhs) { \
-    Vec newVec(lhs); \
-    _map(newVec, [&rhs](const size_type i, const T& value) { \
-        return value op rhs[i]; \
-    }); \
-    return newVec; \
-}
+template <unsigned int N, typename T>
+class Vec: public Mat<N, 1, T> {
+    typedef std::size_t size_type;
+public:
+    Vec(): Mat<N, 1, T>() {}
+    Vec(const std::vector<T>& args): Mat<N, 1, T>(std::vector<std::vector<T>>(1, args)) {}
+    Vec(const std::initializer_list<T>& args): Mat<N, 1, T>{ args } {}
+    Vec(const Mat<N, 1, T>& mat): Mat<N, 1, T>(mat) {}
 
-#define arithmeticalAssignmentVec(op, ar) \
-friend \
-Vec& operator op(Vec& lhs, const Vec& rhs) { \
-    _map(lhs, [&rhs](const size_type i, const T& value) { \
-        return value ar rhs[i]; \
-    }); \
-    return lhs; \
-}
+    template<unsigned int M>
+    Vec<N, T> operator*(const Vec<M, T>& rhs) const {
+        return Mat<N, 1, T>::cwiseProduct(rhs);
+    }
 
-#define arithmeticalCreatingSca(op) \
-friend \
-Vec operator op(const Vec& lhs, const T& rhs) { \
-    Vec newVec(lhs); \
-    _map(newVec, [&rhs](const size_type i, const T& value) { \
-        return value op rhs; \
-    }); \
-    return newVec; \
-}
+    Vec<N, T> normalized() const {
+        return Vec<N, T>(*this / length());
+    }
 
-#define arithmeticalAssignmentSca(op, ar) \
-friend \
-Vec& operator op(Vec& lhs, const T& rhs) { \
-    _map(lhs, [&rhs](const size_type i, const T& value) { \
-        return value ar rhs; \
-    }); \
-    return lhs; \
+    T dot(const Vec& rhs) const {
+        return (this->transpose() * rhs)[0][0];
+    }
+
+    T length() const {
+        T length = 0;
+        for (const auto& item : Mat<N, 1, T>::_container[0]) {
+            length += item * item;
+        }
+        return sqrt(length);
+    }
+
+    inline const T& operator[](const int i) const { return Mat<N, 1, T>::_container[0][i]; }
+    inline T& operator[](const int i) { return Mat<N, 1, T>::_container[0][i]; }
+};
+
+template <unsigned int N, typename T>
+Vec<N, T> normalize(Vec<N, T>& a) {
+    return a.normalized();
 }
 
 template <unsigned int N, typename T>
-class Vec {
-    static_assert(std::is_floating_point_v<T> == true);
-public:
-    typedef std::size_t size_type;
-    Vec(): Vec(N, 0) {}
-    Vec(size_type count, const T& value): _container(count, value) {}
-    Vec(const std::initializer_list<T> parameters): _container{parameters} {
-        assert(parameters.size() == N);
-    }
-    template <unsigned int N1>
-    Vec(const Vec<N1, T>& vec): Vec() {
-        assert(_container.size() <= vec.size());
-        for (int i = 0; i < _container.size(); ++i) {
-            _container[i] = vec[i];
-        }
-    }
+T dot(Vec<N, T>& a, Vec<N, T>& b) {
+    return a.dot(b);
+}
 
-    inline const T operator[](const int i) const { return _container[i]; }
-    inline T& operator[](const int i) { return _container[i]; }
-    inline const size_type size() const { return _container.size(); }
+template <unsigned int N, typename T>
+T length(Vec<N, T>& a) {
+    return a.length();
+}
 
-    Vec operator-() {
-        Vec negVec(*this);
-        _map(negVec, [](const size_type i, const T& value) { return -value; });
-        return negVec;
+template <unsigned int N, typename T>
+std::ostream& operator<<(std::ostream &os, const Vec<N, T>& vec) {
+    for (int i = 0; i < N; ++i) {
+        os << vec[i] << std::endl;
     }
-
-    friend
-    void _foreach(const Vec<N, T>& vec, std::function<void (const T& value)> fn) {
-        for (const T& item : vec._container) {
-            fn(item);
-        }
-    }
-    friend
-    void _map(Vec<N, T>& vec, std::function<T (const size_type i, const T& value)> fn) {
-        for (int i = 0; i < vec._container.size(); ++i) {
-            vec[i] = fn(i, vec._container[i]);
-        }
-    }
-    friend
-    std::ostream &operator<<(std::ostream &os, const Vec<N, T>& vec) {
-        _foreach(vec, [&os](const T& value) -> void {
-            os << value << " ";
-        });
-        return os;
-    }
-
-    arithmeticalCreatingVec(+)
-    arithmeticalCreatingVec(-)
-    arithmeticalCreatingVec(*)
-    arithmeticalCreatingVec(/)
-    arithmeticalCreatingSca(+)
-    arithmeticalCreatingSca(-)
-    arithmeticalCreatingSca(*)
-    arithmeticalCreatingSca(/)
-
-    arithmeticalAssignmentVec(+=, +)
-    arithmeticalAssignmentVec(-=, -)
-    arithmeticalAssignmentVec(*=, *)
-    arithmeticalAssignmentVec(/=, /)
-    arithmeticalAssignmentSca(+=, +)
-    arithmeticalAssignmentSca(-=, -)
-    arithmeticalAssignmentSca(*=, *)
-    arithmeticalAssignmentSca(/=, /)
-
-protected:
-    std::vector<T> _container;
-};
+    return os;
+}
 
 template <typename T>
 class Vec3: public Vec<3, T> {
 public:
     using Vec<3, T>::Vec;
-    Vec3(const T& x, const T& y, const T& z): Vec<3, T>{ x, y, z } {}
-
-    inline const T x() const { return this->_container[0]; }
-    inline const T y() const { return this->_container[1]; }
-    inline const T z() const { return this->_container[2]; }
+    Vec3(const Vec<3, T>& vec): Vec<3, T>(vec) {}
+    T x() { return (*this)[0]; }
+    T y() { return (*this)[1]; }
+    T z() { return (*this)[2]; }
 };
 
 template <typename T>
 class Vec4: public Vec<4, T> {
 public:
     using Vec<4, T>::Vec;
-    Vec4(const T& x, const T& y, const T& z, const T& w): Vec<4, T>{ x, y, z, w } {}
-    inline const T x() const { return this->_container[0]; }
-    inline const T y() const { return this->_container[1]; }
-    inline const T z() const { return this->_container[2]; }
-    inline const T w() const { return this->_container[3]; }
+    Vec4(const Vec<4, T>& vec): Vec<4, T>(vec) {}
+    T x() { return (*this)[0]; }
+    T y() { return (*this)[1]; }
+    T z() { return (*this)[2]; }
+    T w() { return (*this)[3]; }
 };
 
+
 typedef Vec3<float> Vec3f;
-typedef Vec3<double> Vec3d;
 typedef Vec4<float> Vec4f;
+typedef Vec3<double> Vec3d;
 typedef Vec4<double> Vec4d;
 
 #endif //CRENDERER_VEC_HPP
