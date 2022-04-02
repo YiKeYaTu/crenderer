@@ -4,12 +4,29 @@
 
 #include <core/Vec.hpp>
 #include <core/Mat.hpp>
+#include <object/Mesh.hpp>
+#include <object/Triangle.hpp>
+#include <renderer/OpenGLRenderer.hpp>
+#include <scene/Loader.hpp>
+#include <scene/Scene.hpp>
+#include <shader/GLSLShader.hpp>
 
 int main() {
-    Mat4f m(Mat4f::Translation(Vec3f{ 1, 3, 5 }));
-    Vec4f v { 1, 3, 5, 1 };
+    Loader spot = Loader("../models/spot/spot_triangulated_good.obj");
+//    Loader box = Loader("../models/cornellbox/shortbox.obj");
 
-    std::cout << m * v << std::endl;
+    Scene scene;
+//    scene.add(box.meshes());
+    scene.add(spot.meshes());
+
+    Camera camera(
+        Vec3f { 0, 0, 2 },
+        Vec3f { 0, 0, 0 },
+        Vec3f { 0, 1, 0 }
+    );
+
+    OpenGLRenderer openGlRenderer = OpenGLRenderer::createOpenGLRenderer();
+    openGlRenderer.render(scene, camera);
 
     return 0;
 }

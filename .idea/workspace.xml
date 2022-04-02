@@ -2,12 +2,19 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="crenderer" targetName="gpuShade" />
-      <config projectName="crenderer" targetName="testVecMat" />
       <config projectName="crenderer" targetName="crenderer" />
+      <config projectName="crenderer" targetName="update_mappings" />
       <config projectName="crenderer" targetName="gpuIntersectTest" />
       <config projectName="crenderer" targetName="testOpenCLMemory" />
+      <config projectName="crenderer" targetName="assimp_cmd" />
+      <config projectName="crenderer" targetName="glfw" />
+      <config projectName="crenderer" targetName="gpuShade" />
+      <config projectName="crenderer" targetName="testVecMat" />
+      <config projectName="crenderer" targetName="unit" />
+      <config projectName="crenderer" targetName="assimp" />
+      <config projectName="crenderer" targetName="glad" />
       <config projectName="crenderer" targetName="gpuTest" />
+      <config projectName="crenderer" targetName="uninstall" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -17,9 +24,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78897feb-7e53-4746-8860-242c4d981831" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/Mat.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/core/Mat.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/Vec.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/core/Vec.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/Mat.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Mat.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/Vec.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Vec.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene.sce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene1.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene1.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene1.sce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene2.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene2.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene2.sce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene3.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene3.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene3.sce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene4.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene4.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene4.sce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene5.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene5.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/scenes/scene5.sce" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/testVecMat.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/testVecMat.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,6 +58,13 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CMakeLists.txt" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -51,7 +85,7 @@
     <option name="minorVersion" value="3.2" />
   </component>
   <component name="ProjectId" id="25meC17KGPtzoXf11RvVQB7iV0I" />
-  <component name="ProjectLevelVcsManager">
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -64,6 +98,7 @@
     <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.advertisement.text.has.clang-format" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="cmake.loaded.for.project" value="true" />
@@ -73,15 +108,35 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/gpu/openCL/kernel/material" />
       <recent name="$PROJECT_DIR$/gpu/openCL/include/material" />
       <recent name="$PROJECT_DIR$/gpu/openCL/include/object" />
       <recent name="$PROJECT_DIR$/gpu/openCL/kernel" />
-      <recent name="$PROJECT_DIR$/gpu/openCL/include" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.testVecMat">
+    <configuration name="assimp" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="assimp" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="assimp_cmd" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="assimp_cmd" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="crenderer" RUN_TARGET_NAME="assimp_cmd">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="crenderer" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="crenderer" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="crenderer" RUN_TARGET_NAME="crenderer">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="glad" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="glad" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="glfw" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="glfw" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -111,6 +166,21 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="uninstall" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="uninstall" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="unit" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="unit" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="crenderer" RUN_TARGET_NAME="unit">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="update_mappings" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="crenderer" TARGET_NAME="update_mappings" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <list>
       <item itemvalue="CMake Application.crenderer" />
       <item itemvalue="CMake Application.gpuIntersectTest" />
@@ -118,6 +188,13 @@
       <item itemvalue="CMake Application.gpuTest" />
       <item itemvalue="CMake Application.testOpenCLMemory" />
       <item itemvalue="CMake Application.testVecMat" />
+      <item itemvalue="CMake Application.glad" />
+      <item itemvalue="CMake Application.assimp" />
+      <item itemvalue="CMake Application.unit" />
+      <item itemvalue="CMake Application.assimp_cmd" />
+      <item itemvalue="CMake Application.uninstall" />
+      <item itemvalue="CMake Application.glfw" />
+      <item itemvalue="CMake Application.update_mappings" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -143,7 +220,10 @@
       <workItem from="1648033893777" duration="16131000" />
       <workItem from="1648534449256" duration="23081000" />
       <workItem from="1648621646199" duration="9613000" />
-      <workItem from="1648709582392" duration="2980000" />
+      <workItem from="1648709582392" duration="21961000" />
+      <workItem from="1648799751389" duration="1081000" />
+      <workItem from="1648802121641" duration="2658000" />
+      <workItem from="1648811688594" duration="28040000" />
     </task>
     <servers />
   </component>
