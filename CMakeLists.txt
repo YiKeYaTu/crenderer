@@ -12,18 +12,6 @@ include_directories(src)
 
 add_subdirectory(3rdparty)
 
-add_executable( crenderer main.cpp)
-add_executable( gpuTest gpu/test.cpp )
-add_executable( gpuIntersectTest gpu/testIntersec.cpp )
-add_executable( gpuShade gpu/testShade.cpp )
-add_executable( testOpenCLMemory gpu/testOpenCLMemory.cpp )
-
-target_link_libraries( crenderer OpenCL::OpenCL )
-target_link_libraries( gpuTest OpenCL::OpenCL )
-target_link_libraries( gpuIntersectTest OpenCL::OpenCL )
-target_link_libraries( gpuShade OpenCL::OpenCL )
-target_link_libraries( testOpenCLMemory OpenCL::OpenCL )
-
 include_directories( 3rdparty/glad/include )
 add_executable( testVecMat testVecMat.cpp )
 target_link_libraries( testVecMat glad glfw assimp::assimp )
