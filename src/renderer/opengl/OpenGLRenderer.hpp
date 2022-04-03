@@ -10,17 +10,15 @@
 #include <GLFW/glfw3.h>
 #include <shader/GLSLShader.hpp>
 #include <scene/Camera.hpp>
+#include "object/primitive/Triangle.hpp"
 
 class OpenGLRenderer: public Renderer {
 private:
+    std::string _windowTitle;
+
     static void _framebufferSizeCallback(GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
     }
-
-    using Renderer::Renderer;
-
-    std::string _windowTitle;
-
     static void _initOpenGL() {
         static bool inited = false;
         if (inited) {
@@ -65,13 +63,13 @@ private:
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         }
-
         return GLFW_PRESS;
     }
 
-    void _renderMesh(const Mesh<Triangle>& mesh, const Camera& camera) const {
+    void _renderMesh(const Scene& scene, const Mesh<Triangle>& mesh, const Camera& camera) const {
         GLSLShader shader("../glsl/vertexShader.glsl", "../glsl/fragmentShader.glsl");
-        shader.setUniform("uProjection", Mat4f::Perspective(0.01, 2000, 90.0 / 180 * M_PI, 1.0));
+        shader.setUniform("uProjection", camera.calcProjectionMatrix(static_cast<float>(scene.width()) / scene.height
+        ()));
         shader.setUniform("uModel", Mat4f::Identity());
         shader.setUniform("uView", camera.calcViewMatrix());
 
@@ -136,25 +134,25 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             for (const auto& mesh : meshes) {
-                _renderMesh(mesh, camera);
+                _renderMesh(scene, mesh, camera);
             }
 
             if (pressedKey == glfwGetKey(window, GLFW_KEY_W)) {
-                camera.moveForward(0.01);
+                camera.moveForward(0.1);
             } else if (pressedKey == glfwGetKey(window, GLFW_KEY_S)) {
-                camera.moveForward(-0.01);
+                camera.moveForward(-0.1);
             } else if (pressedKey == glfwGetKey(window, GLFW_KEY_A)) {
-                camera.moveSide(-0.01);
+                camera.moveSide(-0.1);
             } else if (pressedKey == glfwGetKey(window, GLFW_KEY_D)) {
-                camera.moveSide(0.01);
+                camera.moveSide(0.1);
             } else if (pressedKey == glfwGetKey(window, GLFW_KEY_LEFT)) {
-                camera.rotateRaw(-1.0 / 180 * M_PI);
+                camera.rotateRaw(-3.0 / 180 * M_PI);
             } else if (pressedKey == glfwGetKey(window, GLFW_KEY_RIGHT)) {
-                camera.rotateRaw(1.0 / 180 * M_PI);
+                camera.rotateRaw(3.0 / 180 * M_PI);
             } else if (pressedKey == glfwGetKey(window, GLFW_KEY_UP)) {
-                camera.rotatePitch(-1.0 / 180 * M_PI);
+                camera.rotatePitch(-3.0 / 180 * M_PI);
             } else if (pressedKey == glfwGetKey(window, GLFW_KEY_DOWN)) {
-                camera.rotatePitch(1.0 / 180 * M_PI);
+                camera.rotatePitch(3.0 / 180 * M_PI);
             }
 
             glfwSwapBuffers(window);

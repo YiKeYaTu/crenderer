@@ -10,15 +10,13 @@
 
 class Scene {
 private:
-    unsigned short _width = 600;
-    unsigned short _height = 600;
+    unsigned short _width = 1920;
+    unsigned short _height = 1080;
     std::vector<Mesh<Triangle>> _meshes;
 
 public:
     const unsigned short width() const { return _width; }
     const unsigned short height() const { return _height; }
-
-    Scene() {}
 
     const std::vector<Mesh<Triangle>>& meshes() const { return _meshes; }
 

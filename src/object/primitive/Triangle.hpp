@@ -5,13 +5,13 @@
 #ifndef CRENDERER_TRIANGLE_HPP
 #define CRENDERER_TRIANGLE_HPP
 
-#include <object/Primitive.hpp>
-#include <core/Vec.hpp>
-#include <core/Vertex.hpp>
+#include "object/primitive/PrimitivePolygon.hpp"
+#include "core/Vec.hpp"
+#include "core/Vertex.hpp"
 
-class Triangle: public Primitive<3> {
+class Triangle: public PrimitivePolygon<3> {
 public:
-    using Primitive<3>::Primitive;
+    using PrimitivePolygon<3>::PrimitivePolygon;
 
     Vec3f& v0() { return _vertexes[0]; }
     Vec3f& v1() { return _vertexes[1]; }

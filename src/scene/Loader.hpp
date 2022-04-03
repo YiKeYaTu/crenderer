@@ -8,7 +8,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <object/Mesh.hpp>
+#include "object/mesh/Mesh.hpp"
 #include <vector>
 #include <core/Vec.hpp>
 

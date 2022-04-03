@@ -217,7 +217,8 @@ public:
         return perspective;
     }
 
-    static Mat<4, 4, T> LookAt(const Mat<3, 1, T>& eyePos, const Mat<3, 1, T>& targetPos, const Mat<3, 1, T>& upDir);
+    static Mat<4, 4, T> LookAt(const Mat<3, 1, T>&, const Mat<3, 1, T>&, const Mat<3, 1, T>&);
+    static Mat<4, 4, T> LookAt(const Mat<3, 1, T>&, const Mat<3, 1, T>&, const Mat<3, 1, T>&, const Mat<3, 1, T>&);
 };
 
 typedef Mat4<float> Mat4f;

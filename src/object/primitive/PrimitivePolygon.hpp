@@ -2,29 +2,33 @@
 // Created by lc on 2022/3/31.
 //
 
-#ifndef CRENDERER_PRIMITIVE_HPP
-#define CRENDERER_PRIMITIVE_HPP
+#ifndef CRENDERER_PRIMITIVEPOLYGON_HPP
+#define CRENDERER_PRIMITIVEPOLYGON_HPP
 
-#include <object/Object.hpp>
-#include <core/Vec.hpp>
+#include "object/primitive/Primitive.hpp"
+#include "core/Vec.hpp"
 #include <vector>
 
+class _PrimitivePolygon: public Primitive {
+public:
+    using Primitive::Primitive;
+};
+
 template <unsigned int NumVertexes>
-class Primitive: public Object {
+class PrimitivePolygon: public _PrimitivePolygon {
     static_assert(NumVertexes > 2);
 protected:
     typedef unsigned int sizeType;
 public:
-    virtual Vec3f calcNormalByPoint(Vec3f& point) const = 0;
-    virtual Vec3f getNormalByIndex(sizeType idx) const { assert(idx < NumVertexes); return _normals[idx]; }
-
+    virtual Vec3f getNormalByVertex(sizeType vertexIdx) const { assert(vertexIdx < NumVertexes); return _normals[vertexIdx]; }
     static const sizeType numVertexes = NumVertexes;
-    Primitive(const Vec3f* vertexes, const sizeType* indexes, const Vec3f* normals = nullptr, const Vec2f* texCoords
+    PrimitivePolygon(const Vec3f* vertexes, const sizeType* indexes, const Vec3f* normals = nullptr, const Vec2f* texCoords
     = nullptr) {
         for (int i = 0; i < NumVertexes; ++i) {
             _vertexes[i] = vertexes[indexes[i]];
-            _edges[i] = (i == NumVertexes) ? vertexes[indexes[0]] - vertexes[indexes[i]] : vertexes[indexes[i + 1]] -
-                    vertexes[indexes[i]];
+            _edges[i] = (i == NumVertexes - 1)
+                ? vertexes[indexes[0]] - vertexes[indexes[i]]
+                : vertexes[indexes[i + 1]] - vertexes[indexes[i]];
 
             if (texCoords) {
                 _texCoords[i] = texCoords[indexes[i]];
@@ -48,4 +52,4 @@ protected:
     std::vector<Vec3f> _edges = std::vector<Vec3f>(NumVertexes);
 };
 
-#endif //CRENDERER_PRIMITIVE_HPP
+#endif //CRENDERER_PRIMITIVEPOLYGON_HPP

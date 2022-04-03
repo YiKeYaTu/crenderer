@@ -12,10 +12,7 @@
 
 class Renderer {
 public:
-    Renderer() {}
-
     virtual void render(const Scene& scene, const Camera& camera) const = 0;
-//    virtual std::vector<Vec3f> renderFrame(const Scene& scene) const = 0;
 };
 
 #endif //CRENDERER_RENDERER_HPP

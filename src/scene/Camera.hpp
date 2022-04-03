@@ -9,48 +9,42 @@
 
 class Camera {
 private:
-    mutable Vec3f _cameraPos, _targetPos, _upDir;
+    mutable Vec3f _cameraPos, _upDir;
     mutable Vec3f _front, _right, _up;
-
-    void _initCoordinates() const {
-        _front = Vec3f(_targetPos - _cameraPos).normalized();
+public:
+    Camera(const Vec3f& pos, const Vec3f& target, const Vec3f& upDir)
+        : _cameraPos(pos), _upDir(upDir.normalized()) {
+        _front = Vec3f(target - _cameraPos).normalized();
         _right = crossProduct(_upDir, _front).normalized();
         _up = crossProduct(_front, _right).normalized();
     }
 
-public:
-    Camera(const Vec3f& pos, const Vec3f& target, const Vec3f& upDir)
-        : _cameraPos(pos), _targetPos(target), _upDir(upDir) {
-        _initCoordinates();
-    }
-
-    Mat4f calcViewMatrix() const {
-        return Mat4f::LookAt(_cameraPos, _targetPos, _upDir);
+    Mat4f calcViewMatrix() const { return Mat4f::LookAt(_cameraPos, _right, _up, _front); }
+    Mat4f calcProjectionMatrix(float aspectRatio = 1.0, float zn = 0.01, float zf = 2000, float fov = 60.0 / 180 *
+            M_PI) const {
+        return Mat4f::Perspective(zn, zf, fov, aspectRatio);
     }
 
     void rotateRaw(float radian) const {
-        _targetPos = Mat4f::Translation(_cameraPos)
-            * Mat4f::Rotation(radian, _up)
-            * Mat4f::Translation(-_cameraPos)
-            * Vec4f(_targetPos, 1.0);
-        _initCoordinates();
+        auto rotationMatrix = Mat4f::Rotation(radian, _upDir);
+        _front = Vec3f(rotationMatrix * Vec4f(_front, 1.0)).normalized();
+        _right = Vec3f(rotationMatrix * Vec4f(_right, 1.0)).normalized();
+        _up = crossProduct(_front, _right).normalized();
     }
     void rotatePitch(float radian) const {
-        _targetPos = Mat4f::Translation(_cameraPos)
-            * Mat4f::Rotation(radian, _right)
-            * Mat4f::Translation(-_cameraPos)
-            * Vec4f(_targetPos, 1.0);
-        _initCoordinates();
+        auto rotationMatrix = Mat4f::Rotation(radian, _right);
+        _front = Vec3f(rotationMatrix * Vec4f(_front, 1.0)).normalized();
+        _up = Vec3f(rotationMatrix * Vec4f(_up, 1.0)).normalized();
+        _right = crossProduct(_up, _front).normalized();
     }
 
     void moveForward(float delta) const {
-        _cameraPos = _cameraPos + _front * delta;
-        _targetPos = _targetPos + _front * delta;
+        Vec3f forwardDir(_front.x(), 0, _front.z());
+        _cameraPos = _cameraPos + forwardDir * delta;
     }
-
     void moveSide(float delta) const {
-        _cameraPos = _cameraPos + _right * delta;
-        _targetPos = _targetPos + _right * delta;
+        Vec3f sideDir(_right.x(), 0, _right.z());
+        _cameraPos = _cameraPos + sideDir * delta;
     }
 };
 

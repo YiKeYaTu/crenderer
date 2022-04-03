@@ -56,8 +56,13 @@ public:
 };
 
 template <unsigned int N, typename T>
-Vec<N, T> normalize(Vec<N, T>& a) {
+Vec<N, T> normalize(const Vec<N, T>& a) {
     return a.normalized();
+}
+
+template <unsigned int N, typename T>
+Vec<N, T> normalize(const Mat<N, 1, T>& a) {
+    return Vec<N, T>(a).normalized();
 }
 
 template <unsigned int N, typename T>
@@ -127,40 +132,46 @@ public:
     T w() const { return (*this)[3]; }
 };
 
+typedef Vec2<float> Vec2f;
+typedef Vec3<float> Vec3f;
+typedef Vec4<float> Vec4f;
+typedef Vec3<double> Vec3d;
+typedef Vec4<double> Vec4d;
+
 template <typename T>
-Mat<4, 4, T> Mat4<T>::LookAt(const Mat<3, 1, T> &eyePos, const Mat<3, 1, T> &targetPos, const Mat<3, 1, T> &upDir) {
-    Vec3<T> front(targetPos - eyePos);
-    Vec3<T> right(crossProduct(Vec3<T>(upDir), Vec3<T>(front)));
-    Vec3<T> up(crossProduct(Vec3<T>(front), Vec3<T>(right)));
-
-    front = front.normalized();
-    right = right.normalized();
-    up = up.normalized();
-
+Mat<4, 4, T> Mat4<T>::LookAt(
+    const Mat<3, 1, T>& eyePos,
+    const Mat<3, 1, T>& right,
+    const Mat<3, 1, T>& up,
+    const Mat<3, 1, T>& front
+) {
     auto lookAt = Mat<4, 4, T>::Identity();
     auto trans = Mat4f::Translation(-eyePos);
 
-    lookAt[0][0] = right[0];
-    lookAt[0][1] = up[0];
-    lookAt[0][2] = front[0];
+    lookAt[0][0] = right[0][0];
+    lookAt[0][1] = up[0][0];
+    lookAt[0][2] = front[0][0];
     lookAt[0][3] = 0;
-    lookAt[1][0] = right[1];
-    lookAt[1][1] = up[1];
-    lookAt[1][2] = front[1];
+    lookAt[1][0] = right[0][1];
+    lookAt[1][1] = up[0][1];
+    lookAt[1][2] = front[0][1];
     lookAt[1][3] = 0;
-    lookAt[2][0] = right[2];
-    lookAt[2][1] = up[2];
-    lookAt[2][2] = front[2];
+    lookAt[2][0] = right[0][2];
+    lookAt[2][1] = up[0][2];
+    lookAt[2][2] = front[0][2];
     lookAt[2][3] = 0;
 
     return lookAt * trans;
 }
 
 
-typedef Vec2<float> Vec2f;
-typedef Vec3<float> Vec3f;
-typedef Vec4<float> Vec4f;
-typedef Vec3<double> Vec3d;
-typedef Vec4<double> Vec4d;
+template <typename T>
+Mat<4, 4, T> Mat4<T>::LookAt(const Mat<3, 1, T> &eyePos, const Mat<3, 1, T> &targetPos, const Mat<3, 1, T> &upDir) {
+    Vec3<T> front(targetPos - eyePos);
+    Vec3<T> right(crossProduct(Vec3<T>(upDir), Vec3<T>(front)));
+    Vec3<T> up(crossProduct(Vec3<T>(front), Vec3<T>(right)));
+    return Mat4<T>::LookAt(eyePos, front.normalized(), right.normalized(), up.normalized());
+}
+
 
 #endif //CRENDERER_VEC_HPP

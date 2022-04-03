@@ -24,29 +24,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78897feb-7e53-4746-8860-242c4d981831" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/Mat.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Mat.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/Vec.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Vec.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene.sce" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene1.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene1.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene1.sce" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene2.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene2.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene2.sce" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene3.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene3.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene3.sce" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene4.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene4.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene4.sce" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene5.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene5.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/scenes/scene5.sce" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/Mat.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Mat.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/Vec.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/Vec.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/material/Material.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/material/Material.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/object/Mesh.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/object/mesh/Mesh.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/object/Object.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/object/Object.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/object/Primitive.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/object/primitive/PrimitivePolygon.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/object/Triangle.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/object/primitive/Triangle.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/OpenGLRenderer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/opengl/OpenGLRenderer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/renderer/Renderer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/renderer/Renderer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scene/Camera.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/scene/Camera.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scene/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/scene/Loader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/scene/Scene.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/scene/Scene.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/shader/GLSLShader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/shader/GLSLShader.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testVecMat.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/testVecMat.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -108,11 +99,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/object/mesh" />
+      <recent name="$PROJECT_DIR$/src/object/primitive" />
+      <recent name="$PROJECT_DIR$/src/renderer/opengl" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/gpu/openCL/kernel/material" />
-      <recent name="$PROJECT_DIR$/gpu/openCL/include/material" />
-      <recent name="$PROJECT_DIR$/gpu/openCL/include/object" />
-      <recent name="$PROJECT_DIR$/gpu/openCL/kernel" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.testVecMat">
@@ -223,7 +214,7 @@
       <workItem from="1648709582392" duration="21961000" />
       <workItem from="1648799751389" duration="1081000" />
       <workItem from="1648802121641" duration="2658000" />
-      <workItem from="1648811688594" duration="28040000" />
+      <workItem from="1648811688594" duration="39899000" />
     </task>
     <servers />
   </component>

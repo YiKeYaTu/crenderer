@@ -6,14 +6,12 @@
 #define CRENDERER_MATERIAL_HPP
 
 #include <core/Vec.hpp>
+#include <object/Object.hpp>
 
 class Material {
 public:
-    float kd() const { return _kd; }
-    float ks() const { return _ks; }
-    float ka() const { return _ka; }
 private:
-    float _kd, _ks, _ka;
+
 };
 
 #endif //CRENDERER_MATERIAL_HPP
