@@ -9,7 +9,7 @@
 
 class Primitive: Object {
 public:
-    Primitive(): Object(Object::ObjectCategory::PRIMITIVE) {}
+    Primitive(): Object(ObjectCategory::PRIMITIVE) {}
     virtual Vec3f calcNormalByPoint(Vec3f& point) const = 0;
 };
 

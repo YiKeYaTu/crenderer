@@ -11,6 +11,7 @@
 #include "object/mesh/Mesh.hpp"
 #include <vector>
 #include <core/Vec.hpp>
+#include <object/primitive/Triangle.hpp>
 
 class Loader {
 private:

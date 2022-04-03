@@ -4,16 +4,17 @@
 
 #include <core/Vec.hpp>
 #include <core/Mat.hpp>
-#include "object/mesh/Mesh.hpp"
-#include "object/primitive/Triangle.hpp"
-#include "renderer/opengl/OpenGLRenderer.hpp"
+#include <object/mesh/Mesh.hpp>
+#include <object/primitive/Triangle.hpp>
+#include <renderer/opengl/OpenGLRenderer.hpp>
 #include <scene/Loader.hpp>
 #include <scene/Scene.hpp>
 #include <shader/GLSLShader.hpp>
+#include <scene/Camera.hpp>
 
 int main() {
-    Loader spot = Loader("../models/spot/spot_triangulated_good.obj");
-    Loader box = Loader("../models/cornellbox/shortbox.obj");
+    Loader spot = Loader("../example/models/spot/spot_triangulated_good.obj");
+    Loader box = Loader("../example/models/cornellbox/shortbox.obj");
 
     Scene scene;
     scene.add(box.meshes());

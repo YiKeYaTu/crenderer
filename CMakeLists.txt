@@ -1,17 +1,25 @@
 cmake_minimum_required(VERSION 3.21)
-project(crenderer)
+project(crd)
 
 set(CMAKE_CXX_STANDARD 20)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-find_package( OpenCL REQUIRED )
+add_subdirectory( 3rdparty )
 
-include_directories(src)
+file( GLOB_RECURSE src_files ${PROJECT_SOURCE_DIR}/*/*.hpp )
 
-add_subdirectory(3rdparty)
+add_library( crd INTERFACE )
+add_library(crd::crd ALIAS crd)
 
-include_directories( 3rdparty/glad/include )
-add_executable( testVecMat testVecMat.cpp )
-target_link_libraries( testVecMat glad glfw assimp::assimp )
+target_sources( crd INTERFACE ${src_files} )
+
+target_include_directories( crd INTERFACE "${PROJECT_SOURCE_DIR}" )
+target_include_directories( crd INTERFACE "${PROJECT_SOURCE_DIR}/3rdparty" )
+target_include_directories( crd INTERFACE "${PROJECT_SOURCE_DIR}/3rdparty/glad/include" )
+target_link_libraries( crd INTERFACE glad glfw assimp )
+
+add_executable( example example/example.cpp )
+target_link_libraries( example crd )
+

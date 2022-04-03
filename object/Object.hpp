@@ -7,13 +7,13 @@
 
 #include <core/Vec.hpp>
 
+static enum ObjectCategory {
+    PRIMITIVE,
+    MESH
+};
+
 class Object {
 public:
-    static enum ObjectCategory {
-        PRIMITIVE,
-        MESH
-    };
-
     Object() = delete;
     Object(const ObjectCategory& objectCategory): _objectCategory(objectCategory) {}
     const ObjectCategory& objectCategory() const { return _objectCategory; }

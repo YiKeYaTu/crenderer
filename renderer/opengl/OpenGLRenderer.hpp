@@ -67,7 +67,7 @@ private:
     }
 
     void _renderMesh(const Scene& scene, const Mesh<Triangle>& mesh, const Camera& camera) const {
-        GLSLShader shader("../glsl/vertexShader.glsl", "../glsl/fragmentShader.glsl");
+        GLSLShader shader("../example/glsl/vertexShader.glsl", "../example/glsl/fragmentShader.glsl");
         shader.setUniform("uProjection", camera.calcProjectionMatrix(static_cast<float>(scene.width()) / scene.height
         ()));
         shader.setUniform("uModel", Mat4f::Identity());

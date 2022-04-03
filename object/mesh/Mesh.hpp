@@ -21,7 +21,7 @@ public:
         const std::vector<sizeType>& indexes,
         const std::vector<Vec3f>& normals,
         const std::vector<Vec2f>& texCoords
-    ) : Object(Object::ObjectCategory::MESH), _numVertexesPerPrimitive
+    ) : Object(ObjectCategory::MESH), _numVertexesPerPrimitive
     (T::numVertexes) {
         assert(vertexes.size() > 0 && indexes.size() > 0 && vertexes.size() == normals.size());
         _vertexes.reserve(vertexes.size());
