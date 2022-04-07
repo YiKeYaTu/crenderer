@@ -5,19 +5,28 @@
 #ifndef CRENDERER_LOADER_HPP
 #define CRENDERER_LOADER_HPP
 
+#include <vector>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "object/mesh/Mesh.hpp"
-#include <vector>
 #include <core/Vec.hpp>
+#include <object/mesh/Mesh.hpp>
 #include <object/primitive/Triangle.hpp>
+#include <unordered_map>
+#include <string>
 
 class Loader {
+    inline static std::unordered_map<std::string, Loader> loaders = std::unordered_map<std::string, Loader>();
+
 private:
-    Assimp::Importer _importer;
-    aiScene* _scene;
+    const aiScene* _scene;
     std::vector<Mesh<Triangle>> _meshes;
+
+    Loader(const std::string& path) {
+        Assimp::Importer importer;
+        _scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+        _processNode(_scene->mRootNode);
+    }
 
     void _processNode(aiNode *node) {
         if (!node) {
@@ -61,15 +70,6 @@ private:
             }
         }
 
-//        if (mesh->mMaterialIndex >= 0) {
-//            aiMaterial *material = _scene->mMaterials[mesh->mMaterialIndex];
-//            for(unsigned int i = 0; i < material->GetTextureCount(aiTextureType_DIFFUSE); i++) {
-//                aiString str;
-//                material->GetTexture(aiTextureType_DIFFUSE, i, &str);
-//
-//            }
-//        }
-
         _meshes.emplace_back(
             vertexes,
             indexes,
@@ -80,15 +80,17 @@ private:
     }
 
 public:
-    Loader(const std::string& path)
-        : _scene(const_cast<aiScene*>(_importer.ReadFile(
-            path,
-            aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals
-        ))) {
-        _processNode(_scene->mRootNode);
-    }
-
     const std::vector<Mesh<Triangle>>& meshes() const { return _meshes; }
+    static const Loader load(const std::string& path) {
+        if (loaders.count(path) == 0) {
+            loaders.emplace(path, Loader(path));
+        }
+        return loaders.find(path)->second;
+    }
+    static void unload(const std::string& path) {
+        if (loaders.count(path)) {
+            loaders.erase(path);
+        }
+    }
 };
-
 #endif //CRENDERER_LOADER_HPP

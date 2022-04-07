@@ -8,9 +8,11 @@
 #include <renderer/Renderer.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <shader/GLSLShader.hpp>
+#include <shader/ShaderGLSL.hpp>
 #include <scene/Camera.hpp>
-#include "object/primitive/Triangle.hpp"
+#include <object/primitive/Triangle.hpp>
+#include <unordered_map>
+#include <material/MaterialOpenGL.hpp>
 
 class OpenGLRenderer: public Renderer {
 private:
@@ -59,55 +61,25 @@ private:
         return window;
     }
 
-    unsigned int _processInput(GLFWwindow *window) const {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    unsigned int _processInput(GLFWwindow *window, const Camera& camera) const {
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose(window, true);
-        }
-        return GLFW_PRESS;
-    }
-
-    void _renderMesh(const Scene& scene, const Mesh<Triangle>& mesh, const Camera& camera) const {
-        GLSLShader shader("../example/glsl/vertexShader.glsl", "../example/glsl/fragmentShader.glsl");
-        shader.setUniform("uProjection", camera.calcProjectionMatrix(static_cast<float>(scene.width()) / scene.height
-        ()));
-        shader.setUniform("uModel", Mat4f::Identity());
-        shader.setUniform("uView", camera.calcViewMatrix());
-
-        auto& vertexes = mesh.vertexes();
-        auto& indexes = mesh.indexes();
-
-        unsigned int VBO, VAO, EBO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        if (indexes.size() > 0) {
-            glGenBuffers(1, &EBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned long) * indexes.size(), indexes.data(), GL_STATIC_DRAW);
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexes.size(), vertexes.data(), GL_STATIC_DRAW);
-
-        glBindVertexArray(VAO);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)3);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)6);
-        glEnableVertexAttribArray(2);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-
-        glBindVertexArray(VAO);
-        shader.use();
-        if (indexes.size() > 0) {
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glDrawElements(GL_TRIANGLES, indexes.size(), GL_UNSIGNED_INT, 0);
-        } else {
-            glDrawArrays(GL_TRIANGLES, 0, vertexes.size());
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W)) {
+            camera.moveForward(0.1);
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S)) {
+            camera.moveForward(-0.1);
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A)) {
+            camera.moveSide(-0.1);
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D)) {
+            camera.moveSide(0.1);
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT)) {
+            camera.rotateRaw(-3.0 / 180 * M_PI);
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT)) {
+            camera.rotateRaw(3.0 / 180 * M_PI);
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP)) {
+            camera.rotatePitch(-3.0 / 180 * M_PI);
+        } else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN)) {
+            camera.rotatePitch(3.0 / 180 * M_PI);
         }
     }
 
@@ -121,43 +93,43 @@ public:
         return OpenGLRenderer();
     }
 
-    virtual void render(const Scene& scene, const Camera& camera) const override {
-        GLFWwindow* window = _createWindow(scene);
-        const std::vector<Mesh<Triangle>>& meshes = scene.meshes();
+    void render(
+        const Scene& scene,
+        const Camera& camera,
+        std::function<void (
+            std::unordered_map<std::string, MaterialOpenGL>& materials
+        )> initFunc,
+        std::function<void (
+            const Mat4f& view,
+            const Mat4f& projection,
+            std::unordered_map<std::string, MaterialOpenGL>& materials
+        )> renderingFunc,
+        std::function<void (
+            std::unordered_map<std::string, MaterialOpenGL>& materials
+        )> uninitFunc
+    ) const {
+        const auto& materials = scene.materials();
+        std::unordered_map<std::string, MaterialOpenGL> openGLMaterials;
 
-        glEnable(GL_DEPTH_TEST);
+        for (const auto& material : materials) {
+            openGLMaterials.emplace(material.first, material.second);
+        }
+
+        GLFWwindow* window = _createWindow(scene);
+        initFunc(openGLMaterials);
+
+        Mat4f projectionMatrix(camera.calcProjectionMatrix(static_cast<float>(scene.width()) / scene.height()));
 
         while (!glfwWindowShouldClose(window)) {
-            unsigned int pressedKey = _processInput(window);
+            _processInput(window, camera);
 
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            for (const auto& mesh : meshes) {
-                _renderMesh(scene, mesh, camera);
-            }
-
-            if (pressedKey == glfwGetKey(window, GLFW_KEY_W)) {
-                camera.moveForward(0.1);
-            } else if (pressedKey == glfwGetKey(window, GLFW_KEY_S)) {
-                camera.moveForward(-0.1);
-            } else if (pressedKey == glfwGetKey(window, GLFW_KEY_A)) {
-                camera.moveSide(-0.1);
-            } else if (pressedKey == glfwGetKey(window, GLFW_KEY_D)) {
-                camera.moveSide(0.1);
-            } else if (pressedKey == glfwGetKey(window, GLFW_KEY_LEFT)) {
-                camera.rotateRaw(-3.0 / 180 * M_PI);
-            } else if (pressedKey == glfwGetKey(window, GLFW_KEY_RIGHT)) {
-                camera.rotateRaw(3.0 / 180 * M_PI);
-            } else if (pressedKey == glfwGetKey(window, GLFW_KEY_UP)) {
-                camera.rotatePitch(-3.0 / 180 * M_PI);
-            } else if (pressedKey == glfwGetKey(window, GLFW_KEY_DOWN)) {
-                camera.rotatePitch(3.0 / 180 * M_PI);
-            }
+            renderingFunc(camera.calcViewMatrix(), projectionMatrix, openGLMaterials);
 
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
+
+        uninitFunc(openGLMaterials);
     }
 };
 

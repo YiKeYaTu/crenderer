@@ -7,26 +7,33 @@
 
 #include <object/Object.hpp>
 #include <scene/Loader.hpp>
+#include <unordered_map>
+#include <string>
+#include <material/Material.hpp>
 
 class Scene {
 private:
     unsigned short _width = 1920;
     unsigned short _height = 1080;
-    std::vector<Mesh<Triangle>> _meshes;
+    std::unordered_map<std::string, Material> _materials;
 
 public:
     const unsigned short width() const { return _width; }
     const unsigned short height() const { return _height; }
 
-    const std::vector<Mesh<Triangle>>& meshes() const { return _meshes; }
+    const std::unordered_map<std::string, Material>& materials() const { return _materials; }
+    const Material& material(std::string& materialName) const { return _materials.find(materialName)->second; }
 
     void setSceneSize(unsigned short width, unsigned short height) {
         _width = width;
         _height = height;
     }
 
-    void add(const std::vector<Mesh<Triangle>>& meshes) {
-        _meshes.insert(_meshes.begin(), meshes.begin(), meshes.end());
+    void add(const std::string& materialName, const Loader& loader, const Mat4f& transformation = Mat4f::Identity()) {
+        if (_materials.count(materialName)) {
+            throw std::runtime_error(std::string("Find duplicated material: ") + materialName);
+        }
+        _materials.emplace(materialName, Material(loader, transformation));
     }
 
 };

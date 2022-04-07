@@ -6,12 +6,27 @@
 #define CRENDERER_MATERIAL_HPP
 
 #include <core/Vec.hpp>
-#include <object/Object.hpp>
+#include <core/Mat.hpp>
+#include <object/mesh/Mesh.hpp>
+#include <object/primitive/Primitive.hpp>
+#include <scene/Loader.hpp>
+#include <scene/Camera.hpp>
+#include <scene/Scene.hpp>
 
 class Material {
 public:
-private:
+    Material(const Loader& loader, const Mat4f& transformation = Mat4f::Identity())
+        : _loader(loader), _transformation(transformation) {}
 
+    virtual ~Material() {}
+
+    const Mat4f &getTransformation() const {
+        return _transformation;
+    }
+
+protected:
+    const Loader& _loader;
+    const Mat4f _transformation;
 };
 
 #endif //CRENDERER_MATERIAL_HPP

@@ -195,11 +195,28 @@ public:
         return ret;
     }
 
-    template<unsigned int N>
-    static Mat<4, 4, T> Translation(const Mat<N, 1, T>& translations) {
+    static Mat<4, 4, T> Flip(const Mat<3, 1, T>& axis) {
         Mat<4, 4, T> ret(Mat<4, 4, T>::Identity());
-        for (int i = 0; i < N; ++i) {
+        for (int i = 0; i < 3; ++i) {
+            if (axis[0][i] > 0) {
+                ret[i][i] = -ret[i][i];
+            }
+        }
+        return ret;
+    }
+
+    static Mat<4, 4, T> Translation(const Mat<3, 1, T>& translations) {
+        Mat<4, 4, T> ret(Mat<4, 4, T>::Identity());
+        for (int i = 0; i < 3; ++i) {
             ret[3][i] = translations[0][i];
+        }
+        return ret;
+    }
+
+    static Mat<4, 4, T> Scale(const Mat<3, 1, T>& scales) {
+        Mat<4, 4, T> ret(Mat<4, 4, T>::Identity());
+        for (int i = 0; i < 3; ++i) {
+            ret[i][i] *= scales[0][i];
         }
         return ret;
     }

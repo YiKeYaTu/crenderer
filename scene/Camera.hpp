@@ -42,6 +42,7 @@ public:
         Vec3f forwardDir(_front.x(), 0, _front.z());
         _cameraPos = _cameraPos + forwardDir * delta;
     }
+
     void moveSide(float delta) const {
         Vec3f sideDir(_right.x(), 0, _right.z());
         _cameraPos = _cameraPos + sideDir * delta;

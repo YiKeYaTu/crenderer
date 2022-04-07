@@ -20,6 +20,9 @@ target_include_directories( crd INTERFACE "${PROJECT_SOURCE_DIR}/3rdparty" )
 target_include_directories( crd INTERFACE "${PROJECT_SOURCE_DIR}/3rdparty/glad/include" )
 target_link_libraries( crd INTERFACE glad glfw assimp )
 
-add_executable( example example/example.cpp )
-target_link_libraries( example crd )
+add_executable( exampleStencil example/exampleStencil.cpp)
+target_link_libraries( exampleStencil crd )
+
+add_executable( exampleAlphaBlend example/alphaBlend/exampleAlphaBlend.cpp)
+target_link_libraries( exampleAlphaBlend crd )
 
