@@ -5,20 +5,35 @@
 #include <core/Vec.hpp>
 #include <core/Mat.hpp>
 #include <renderer/opengl/OpenGLRenderer.hpp>
-#include <scene/Loader.hpp>
 #include <scene/Scene.hpp>
 #include <shader/ShaderGLSL.hpp>
 #include <scene/Camera.hpp>
 
+#include <loader/Texture2DLoader.hpp>
+#include <loader/MeshLoader.hpp>
+
 int main() {
-    const Loader& spot = Loader::load("../example/models/spot/spot_triangulated_good.obj");
-    const Loader& box = Loader::load("../example/models/cornellbox/shortbox.obj");
+    const MeshLoader& spot = MeshLoader::load("../example/models/spot/spot_triangulated_good.obj");
+    const MeshLoader& box = MeshLoader::load("../example/models/cornellbox/shortbox.obj");
+
+    const Texture2DLoader& spotTexture = Texture2DLoader::load("../example/models/spot/spot_texture.png");
 
     Scene scene;
 
-    scene.add("light", box, Mat4f::Translation(Vec3f { 0, 50, 300 }) * Mat4f::Scale(Vec3f { 0.1, 0.1, 0.1 }));
-    scene.add("box", box, Mat4f::Scale(Vec3f { 0.5, 0.5, 0.5 }));
-    scene.add("spot", spot, Mat4f::Identity());
+    scene.add(
+            "spot",
+            Material(
+                    spot,
+                    std::vector<const TextureLoader*>{ &spotTexture },
+                    Mat4f::Identity()
+            )
+    );
+
+//    scene.add("light", box, Mat4f::Translation(Vec3f { 0, 50, 300 }) * Mat4f::Scale(Vec3f { 0.1, 0.1, 0.1 }));
+//    scene.add("box", box, Mat4f::Scale(Vec3f { 0.5, 0.5, 0.5 }));
+//    scene.add("spot1", spot, Mat4f::Identity());
+////    scene.add("spot2", spot, Mat4f::Translation(Vec3f { 0.5, 0, 2 }));
+////    scene.add("spot3", spot, Mat4f::Translation(Vec3f { -0.5, 0, 4 }));
 //    scene.add(
 //            "floor",
 //            box,
@@ -33,7 +48,10 @@ int main() {
             Vec3f { 0, 1, 0 }
     );
 
-    ShaderGLSL shader("../example/alphaBlend/shaders/vertex.glsl", "../example/alphaBlend/shaders/fragment.glsl");
+    ShaderGLSL shader(
+            "../example/paperReproduction/Interactive Order-Independent Transparency/shaders/vertex.glsl",
+            "../example/paperReproduction/Interactive Order-Independent Transparency/shaders/fragment.glsl"
+    );
     OpenGLRenderer openGlRenderer = OpenGLRenderer::createOpenGLRenderer();
 
     openGlRenderer.render(
@@ -48,9 +66,6 @@ int main() {
 
                 glEnable(GL_DEPTH_TEST);
                 glDepthFunc(GL_LESS);
-
-                glEnable(GL_STENCIL_TEST);
-                glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
             },
             [&shader](
                     const Mat4f& view,

@@ -6,7 +6,6 @@
 #define CRENDERER_SCENE_HPP
 
 #include <object/Object.hpp>
-#include <scene/Loader.hpp>
 #include <unordered_map>
 #include <string>
 #include <material/Material.hpp>
@@ -29,12 +28,19 @@ public:
         _height = height;
     }
 
-    void add(const std::string& materialName, const Loader& loader, const Mat4f& transformation = Mat4f::Identity()) {
+    void add(const std::string& materialName, const Material& material) {
         if (_materials.count(materialName)) {
             throw std::runtime_error(std::string("Find duplicated material: ") + materialName);
         }
-        _materials.emplace(materialName, Material(loader, transformation));
+        _materials.insert({ materialName, material });
     }
+
+//    void add(const std::string& materialName, const Loader& loader, const Mat4f& transformation = Mat4f::Identity()) {
+//        if (_materials.count(materialName)) {
+//            throw std::runtime_error(std::string("Find duplicated material: ") + materialName);
+//        }
+//        _materials.emplace(materialName, Material(loader, transformation));
+//    }
 
 };
 

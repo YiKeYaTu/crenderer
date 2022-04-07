@@ -9,14 +9,18 @@
 #include <core/Mat.hpp>
 #include <object/mesh/Mesh.hpp>
 #include <object/primitive/Primitive.hpp>
-#include <scene/Loader.hpp>
 #include <scene/Camera.hpp>
 #include <scene/Scene.hpp>
 
+#include <loader/MeshLoader.hpp>
+#include <loader/TextureLoader.hpp>
+
 class Material {
 public:
-    Material(const Loader& loader, const Mat4f& transformation = Mat4f::Identity())
-        : _loader(loader), _transformation(transformation) {}
+    Material(const MeshLoader& meshLoader, const std::vector<const TextureLoader*>& textureLoaders, const Mat4f& transformation = Mat4f::Identity())
+        : _meshLoader(&meshLoader), _textureLoaders(textureLoaders), _transformation(transformation) {
+        assert(textureLoaders.size() == 1 || textureLoaders.size() == meshLoader.meshes().size());
+    }
 
     virtual ~Material() {}
 
@@ -25,8 +29,9 @@ public:
     }
 
 protected:
-    const Loader& _loader;
-    const Mat4f _transformation;
+    const MeshLoader* _meshLoader;
+    std::vector<const TextureLoader*> _textureLoaders;
+    Mat4f _transformation;
 };
 
 #endif //CRENDERER_MATERIAL_HPP
