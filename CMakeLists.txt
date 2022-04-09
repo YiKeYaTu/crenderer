@@ -20,9 +20,8 @@ target_include_directories( crd INTERFACE "${PROJECT_SOURCE_DIR}/3rdparty" )
 target_include_directories( crd INTERFACE "${PROJECT_SOURCE_DIR}/3rdparty/glad/include" )
 target_link_libraries( crd INTERFACE glad glfw assimp )
 
-add_executable( exampleStencil example/exampleStencil.cpp)
-target_link_libraries( exampleStencil crd )
-
 add_executable( SSAO "example/examples/SSAO/ssao.cpp")
 target_link_libraries( SSAO crd stb_image )
 
+add_executable( ShadowMap "example/examples/ShadowMap/shadowMap.cpp")
+target_link_libraries( ShadowMap crd stb_image )

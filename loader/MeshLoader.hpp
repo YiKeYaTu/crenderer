@@ -66,10 +66,10 @@ private:
         }
 
         _meshes.emplace_back(
-                vertexes,
-                indexes,
-                normals,
-                texCoords
+            vertexes,
+            indexes,
+            normals,
+            texCoords
         );
     }
 
@@ -79,6 +79,7 @@ public:
         _scene = const_cast<aiScene*>(importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals));
         _processNode(_scene->mRootNode);
     }
+    MeshLoader(const std::vector<Mesh<Triangle>>& meshes): _meshes(meshes) {}
     MeshLoader(const MeshLoader& rhs) = delete;
     MeshLoader& operator=(const MeshLoader& rhs) = delete;
 

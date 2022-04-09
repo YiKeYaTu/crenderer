@@ -12,8 +12,8 @@
 
 class Scene {
 private:
-    unsigned short _width = 1920;
-    unsigned short _height = 1080;
+    unsigned short _width = 1000;
+    unsigned short _height = 800;
     std::unordered_map<std::string, Material> _materials;
 
 public:
@@ -34,14 +34,6 @@ public:
         }
         _materials.insert({ materialName, material });
     }
-
-//    void add(const std::string& materialName, const Loader& loader, const Mat4f& transformation = Mat4f::Identity()) {
-//        if (_materials.count(materialName)) {
-//            throw std::runtime_error(std::string("Find duplicated material: ") + materialName);
-//        }
-//        _materials.emplace(materialName, Material(loader, transformation));
-//    }
-
 };
 
 #endif //CRENDERER_SCENE_HPP

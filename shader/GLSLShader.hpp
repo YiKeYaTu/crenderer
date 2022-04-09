@@ -10,11 +10,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-class ShaderGLSL {
+class GLSLShader {
 private:
-    unsigned int _shaderProgram;
-    unsigned int _vertexShader, _fragmentShader;
-    const std::string _vertexShaderSource, _fragmentShaderSource;
+    unsigned int _shaderProgram = -1;
+    unsigned int _vertexShader = -1, _fragmentShader = -1, _geometryShader = -1;
+    const std::string _vertexShaderSource, _fragmentShaderSource, _geometryShaderSource;
 
     const std::string _loadShaderSource(const std::string& shaderSourcePath) {
         std::ifstream ifs(shaderSourcePath);
@@ -56,26 +56,47 @@ private:
         }
     }
 public:
-    ShaderGLSL(const std::string& vertexShaderSourcePath, const std::string& fragmentShaderSourcePath)
+    GLSLShader(const std::string& vertexShaderSourcePath, const std::string& fragmentShaderSourcePath, const std::string& geometryShaderSource = "")
         : _vertexShaderSource(_loadShaderSource(vertexShaderSourcePath)),
-          _fragmentShaderSource(_loadShaderSource(fragmentShaderSourcePath)) {
-    }
+          _fragmentShaderSource(_loadShaderSource(fragmentShaderSourcePath)),
+          _geometryShaderSource(geometryShaderSource.size() == 0 ? "" : _loadShaderSource(geometryShaderSource)) {}
 
     void init() {
         _shaderProgram = glCreateProgram();
+
         _vertexShader = glCreateShader(GL_VERTEX_SHADER);
         _fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
         _compileShader(_vertexShader, _vertexShaderSource);
         _compileShader(_fragmentShader, _fragmentShaderSource);
+
+        if (_geometryShaderSource.size() > 0) {
+            _geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+            _compileShader(_geometryShader, _geometryShaderSource);
+        }
 
         _linkProgram();
 
         glDeleteShader(_vertexShader);
         glDeleteShader(_fragmentShader);
+        glDeleteShader(_geometryShader);
     }
 
     void use() {
+        if (_shaderProgram == -1) {
+            throw std::runtime_error("shader has not been initialized.");
+        }
         glUseProgram(_shaderProgram);
+    }
+
+    void setUniform(const std::string name, const int value) {
+        glUseProgram(_shaderProgram);
+        glUniform1i(glGetUniformLocation(_shaderProgram, name.c_str()), value);
+    }
+
+    void setUniform(const std::string name, const double value) {
+        glUseProgram(_shaderProgram);
+        glUniform1f(glGetUniformLocation(_shaderProgram, name.c_str()), value);
     }
 
     void setUniform(const std::string name, const Vec4f& vec4f) {

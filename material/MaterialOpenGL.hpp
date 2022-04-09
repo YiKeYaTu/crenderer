@@ -8,7 +8,7 @@
 #include <material/Material.hpp>
 #include <scene/Camera.hpp>
 #include <scene/Scene.hpp>
-#include <shader/ShaderGLSL.hpp>
+#include <shader/GLSLShader.hpp>
 
 #include <loader/TextureLoader.hpp>
 #include <loader/Texture2DLoader.hpp>
@@ -30,7 +30,7 @@ public:
 
         for (int i = 0;i < meshes.size(); ++i) {
             const auto& mesh = meshes[i];
-            const auto& textureLoader = textureLoaders[textureLoaders.size() == 1 ? 0 : i];
+            const auto textureLoader = textureLoaders.size() > 0 ? textureLoaders[textureLoaders.size() == 1 ? 0 : i] : nullptr;
 
             auto& vertexes = mesh.vertexes();
             auto& indexes = mesh.indexes();
@@ -60,9 +60,9 @@ public:
             glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-            unsigned int TEX;
+            unsigned int TEX = -1;
 
-            if (textureLoader->textureType() == TextureType::TEXTURE_2D) {
+            if (textureLoader && textureLoader->textureType() == TextureType::TEXTURE_2D) {
                 const Texture2DLoader* texture2DLoader = static_cast<const Texture2DLoader*>(textureLoader);
                 glGenTextures(1, &TEX);
                 glBindTexture(GL_TEXTURE_2D, TEX);
@@ -87,7 +87,7 @@ public:
         }
     }
 
-    void draw(ShaderGLSL& shader) const {
+    void draw(GLSLShader& shader, std::function<void (unsigned int)> fn = [](unsigned int) {}) const {
         for (int i = 0; i < _bufferUnions.size(); ++ i) {
             const BufferUnion& bufferUnion = _bufferUnions[i];
 
@@ -95,44 +95,12 @@ public:
             glBindVertexArray(bufferUnion.VAO);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferUnion.EBO);
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, bufferUnion.TEX);
-
             shader.use();
+            fn(bufferUnion.TEX);
 
             glDrawElements(GL_TRIANGLES, _meshLoader->meshes()[i].indexes().size(), GL_UNSIGNED_INT, 0);
         }
     }
-
-//    void drawPerMesh(std::function<void (unsigned int)> fn) const {
-//        for (int i = 0; i < _bufferUnions.size(); ++ i) {
-//            const BufferUnion& bufferUnion = _bufferUnions[i];
-//
-//            glBindBuffer(GL_ARRAY_BUFFER, bufferUnion.VBO);
-//            glBindVertexArray(bufferUnion.VAO);
-//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferUnion.EBO);
-//
-//            fn(bufferUnion.TEX);
-//
-//            glDrawElements(GL_TRIANGLES, _meshLoader->meshes()[i].indexes().size(), GL_UNSIGNED_INT, 0);
-//        }
-//    }
-
-//    void draw(ShaderGLSL& shader) const {
-//        for (int i = 0; i < _bufferUnions.size(); ++ i) {
-//            const BufferUnion& bufferUnion = _bufferUnions[i];
-//
-//            glBindBuffer(GL_ARRAY_BUFFER, bufferUnion.VBO);
-//            glBindVertexArray(bufferUnion.VAO);
-//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferUnion.EBO);
-//
-//            shader.use();
-//
-//            glDrawElements(GL_TRIANGLES, _meshLoader->meshes()[i].indexes().size(), GL_UNSIGNED_INT, 0);
-//        }
-//    }
-//
-//    unsigned int  drawAsTexture(ShaderGLSL& shader) const {}
 
 private:
     std::vector<BufferUnion> _bufferUnions;

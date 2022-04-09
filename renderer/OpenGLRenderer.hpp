@@ -8,18 +8,22 @@
 #include <renderer/Renderer.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <shader/ShaderGLSL.hpp>
+#include <shader/GLSLShader.hpp>
 #include <scene/Camera.hpp>
 #include <object/primitive/Triangle.hpp>
 #include <unordered_map>
 #include <material/MaterialOpenGL.hpp>
+#include <renderer/vendor/OpenGL.hpp>
 
 class OpenGLRenderer: public Renderer {
 private:
-    std::string _windowTitle;
+    const std::string _windowTitle;
+    const Scene& _scene;
+
+    OpenGLRenderer(const std::string& title, const Scene& scene): _windowTitle(title), _scene(scene) {}
 
     static void _framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-        glViewport(0, 0, width, height);
+        OpenGL::Window::setViewPort(width, height);
     }
     static void _initOpenGL() {
         static bool inited = false;
@@ -27,22 +31,16 @@ private:
             return;
         }
 
-        glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+        OpenGL::init();
     }
 
-    GLFWwindow* _createWindow(const Scene& scene) const {
+    GLFWwindow* _createWindow() const {
         GLFWwindow* window = glfwCreateWindow(
-                scene.width(),
-                scene.height(),
-                _windowTitle.c_str(),
-                NULL,
-                NULL
+            _scene.width(),
+            _scene.height(),
+            _windowTitle.c_str(),
+            NULL,
+            NULL
         );
 
         if (window == NULL) {
@@ -51,7 +49,9 @@ private:
         }
 
         glfwMakeContextCurrent(window);
-        glfwSetFramebufferSizeCallback(window, _framebufferSizeCallback);
+        glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+            _framebufferSizeCallback(window, width, height);
+        });
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
@@ -88,18 +88,18 @@ public:
         glfwTerminate();
     }
 
-    static OpenGLRenderer createOpenGLRenderer() {
+    static OpenGLRenderer createOpenGLRenderer(const std::string& title, const Scene& scene) {
         _initOpenGL();
-        return OpenGLRenderer();
+        return OpenGLRenderer(title, scene);
     }
 
     void render(
-        const Scene& scene,
         const Camera& camera,
         std::function<void (
             std::unordered_map<std::string, MaterialOpenGL>& materials
         )> initFunc,
         std::function<void (
+            int width, int height,
             const Mat4f& view,
             const Mat4f& projection,
             std::unordered_map<std::string, MaterialOpenGL>& materials
@@ -108,22 +108,23 @@ public:
             std::unordered_map<std::string, MaterialOpenGL>& materials
         )> uninitFunc
     ) const {
-        const auto& materials = scene.materials();
+        const auto& materials = _scene.materials();
         std::unordered_map<std::string, MaterialOpenGL> openGLMaterials;
 
         for (const auto& material : materials) {
             openGLMaterials.emplace(material.first, material.second);
         }
 
-        GLFWwindow* window = _createWindow(scene);
+        GLFWwindow* window = _createWindow();
         initFunc(openGLMaterials);
 
-        Mat4f projectionMatrix(camera.calcProjectionMatrix(static_cast<float>(scene.width()) / scene.height()));
+        int width, height;
 
         while (!glfwWindowShouldClose(window)) {
             _processInput(window, camera);
 
-            renderingFunc(camera.calcViewMatrix(), projectionMatrix, openGLMaterials);
+            glfwGetFramebufferSize(window, &width, &height);
+            renderingFunc(width, height, camera.calcViewMatrix(), camera.calcProjectionMatrix(static_cast<float>(width) / height), openGLMaterials);
 
             glfwSwapBuffers(window);
             glfwPollEvents();

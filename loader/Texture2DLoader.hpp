@@ -19,10 +19,8 @@ private:
     int _width, _height, _channel;
     unsigned char* _data;
 
-    TextureType _textureType = TextureType::TEXTURE_2D;
-
 public:
-    Texture2DLoader(const std::string& path) {
+    Texture2DLoader(const std::string& path): TextureLoader(TextureType::TEXTURE_2D) {
         _data = stbi_load(path.c_str(), &_width, &_height, &_channel, 0);
     }
 

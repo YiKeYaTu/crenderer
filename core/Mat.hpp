@@ -205,6 +205,14 @@ public:
         return ret;
     }
 
+    static Mat<4, 4, T> Translation(T x, T y, T z) {
+        Mat<4, 4, T> ret(Mat<4, 4, T>::Identity());
+        ret[3][0] = x;
+        ret[3][1] = y;
+        ret[3][2] = z;
+        return ret;
+    }
+
     static Mat<4, 4, T> Translation(const Mat<3, 1, T>& translations) {
         Mat<4, 4, T> ret(Mat<4, 4, T>::Identity());
         for (int i = 0; i < 3; ++i) {
@@ -232,6 +240,29 @@ public:
         perspective[3][2] = (2 * zn * zf) / (zn - zf);
 
         return perspective;
+    }
+
+    static Mat<4, 4, T> Orthogonal(float left, float right, float bottom, float top, float near, float far) {
+        float lr = 1.0 / (left - right);
+        float bt = 1.0 / (bottom - top);
+        float nf = 1.0 / (near - far);
+
+        Mat<4, 4, T> perspective;
+        perspective[0][0] = - 2.0 * lr;
+        perspective[1][1] = - 2.0 * bt;
+        perspective[2][2] = 0;
+        perspective[2][2] = - 2.0 * nf;
+        perspective[3][3] = 1;
+
+        Mat<4, 4, T> translation(
+            Translation(
+                - (left + right) / 2.0,
+                - (bottom + top) / 2.0,
+                - (near + far) / 2.0
+            )
+        );
+
+        return perspective * translation;
     }
 
     static Mat<4, 4, T> LookAt(const Mat<3, 1, T>&, const Mat<3, 1, T>&, const Mat<3, 1, T>&);

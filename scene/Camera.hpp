@@ -24,6 +24,13 @@ public:
             M_PI) const {
         return Mat4f::Perspective(zn, zf, fov, aspectRatio);
     }
+    Mat4f calcOrthogonalProjectionMatrix(
+        float left = -4, float right = 4,
+        float bottom = -4, float top = 4,
+        float near = 0.1, float far = 2000
+    ) const {
+        return Mat4f::Orthogonal(left, right, bottom, top, near, far);
+    }
 
     void rotateRaw(float radian) const {
         auto rotationMatrix = Mat4f::Rotation(radian, _upDir);

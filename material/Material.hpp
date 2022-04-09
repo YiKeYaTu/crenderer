@@ -17,9 +17,9 @@
 
 class Material {
 public:
-    Material(const MeshLoader& meshLoader, const std::vector<const TextureLoader*>& textureLoaders, const Mat4f& transformation = Mat4f::Identity())
+    Material(const MeshLoader& meshLoader, const std::vector<const TextureLoader*>& textureLoaders = std::vector<const TextureLoader*>(), const Mat4f& transformation = Mat4f::Identity())
         : _meshLoader(&meshLoader), _textureLoaders(textureLoaders), _transformation(transformation) {
-        assert(textureLoaders.size() == 1 || textureLoaders.size() == meshLoader.meshes().size());
+        assert(textureLoaders.size() <= 1 || textureLoaders.size() == meshLoader.meshes().size());
     }
 
     virtual ~Material() {}
